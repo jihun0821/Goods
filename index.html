@@ -22,7 +22,7 @@
   <aside class="hidden md:flex fixed top-0 left-0 w-44 h-screen bg-white border-r border-zinc-100 p-4 flex-col">
     <!-- Logo -->
     <div class="flex items-center gap-2 mb-10">
-      <img class="w-6 h-6" src="/-/images/HP1.png" alt="logo" />
+      <img class="w-6 h-6" src="/HanilPoint/images/HP1.png" alt="logo" />
       <span class="text-black font-semibold text-base">HANIL POINT</span>
     </div>
 
@@ -67,25 +67,33 @@
           </div>
         </div>
 
-        <!-- User Box -->
-        <div class="w-full md:w-72 h-16 bg-zinc-100 rounded-3xl backdrop-blur-[2px] relative flex items-center px-4 flex-shrink-0">
-          <div class="flex items-center gap-3 w-full">
-            <img class="w-12 h-12 rounded-full" src="https://placehold.co/50x50" alt="user" />
+        <!-- User Box / Login Button -->
+        <div id="loginContainer" class="w-full md:w-72 h-16 bg-zinc-100 rounded-3xl backdrop-blur-[2px] relative flex items-center justify-center px-4 flex-shrink-0">
+          <!-- 로그인 버튼 (기본) -->
+          <button id="loginButton" class="w-full h-full bg-blue-500 hover:bg-blue-600 rounded-3xl text-white font-semibold transition-colors">
+            구글로 로그인
+          </button>
+          
+          <!-- 사용자 정보 (로그인 후) -->
+          <div id="userInfo" class="hidden flex items-center gap-3 w-full">
+            <img id="userPhoto" class="w-12 h-12 rounded-full" alt="user" />
             <div class="flex flex-col">
-              <div class="text-base font-semibold text-black">2학년 2반 남현주</div>
-              <div class="text-xs font-semibold text-black">20241107@hanilgo.cnehs.kr</div>
+              <div id="userName" class="text-base font-semibold text-black"></div>
+              <div id="userEmail" class="text-xs font-semibold text-black"></div>
             </div>
+            <button id="logoutButton" class="absolute top-2 right-4 text-xs text-red-500 hover:text-red-700">
+              로그아웃
+            </button>
           </div>
-          <img class="absolute top-6 right-4 w-3.5 h-3.5" src="/-/images/underarrow.png" alt="icon" />
         </div>
       </div>
 
       <!-- 나의 POINT 영역 -->
-      <div class="w-full h-48 relative flex-shrink-0">
+      <div id="pointSection" class="w-full h-48 relative flex-shrink-0 hidden">
         <div class="w-full h-48 absolute bg-[#CFDFFF] rounded-3xl backdrop-blur-[2px]"></div>
         <div class="absolute top-4 left-6 text-black text-base font-semibold">나의 POINT</div>
         <div class="absolute top-16 left-6 flex items-center gap-4">
-          <img class="w-12 h-12" src="/-/images/HP2.png" alt="icon" />
+          <img class="w-12 h-12" src="/HanilPoint/images/HP2.png" alt="icon" />
           <span class="text-black text-4xl font-semibold relative -top-[3.5px]">0</span>
         </div>
         <div class="absolute top-[154px] flex gap-4 left-6">
@@ -98,8 +106,8 @@
       </div>
     </div>
 
-    <!-- 타임라인 영역 (화면 남은 공간 딱 맞춤) -->
-    <div class="flex-1 space-y-4 overflow-y-hidden">
+    <!-- 타임라인 영역 (로그인 후에만 표시) -->
+    <div id="timelineSection" class="hidden flex-1 space-y-4 overflow-y-hidden">
       <div class="flex items-center gap-2 mb-4">
         <div class="text-black font-semibold text-base">Time Line</div>
         <div class="w-24 h-6 bg-neutral-100 rounded-3xl flex items-center justify-center cursor-pointer text-sm">전체 보기</div>
@@ -139,6 +147,140 @@
         </div>
       </div>
     </div>
+
+    <!-- 로그인 안내 메시지 (로그인 전) -->
+    <div id="loginPrompt" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <h2 class="text-xl font-semibold text-gray-600 mb-2">Hanil Point에 오신 것을 환영합니다!</h2>
+        <p class="text-gray-500">구글 계정으로 로그인하여 서비스를 이용해보세요.</p>
+      </div>
+    </div>
   </main>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Firebase 설정 및 초기화
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_YES_I20XByZpXjCN2p1Vp5gueS4Op24",
+      authDomain: "hsp-auth-22845.firebaseapp.com",
+      projectId: "hsp-auth-22845",
+      storageBucket: "hsp-auth-22845.firebasestorage.app",
+      messagingSenderId: "1034282361573",
+      appId: "1:1034282361573:web:a15b970a18ae7033552a0c",
+      measurementId: "G-EQZ1QFGDZ2"
+    };
+
+    // Firebase 앱 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // DOM 요소
+    const loginButton = document.getElementById('loginButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const userInfo = document.getElementById('userInfo');
+    const userPhoto = document.getElementById('userPhoto');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const pointSection = document.getElementById('pointSection');
+    const timelineSection = document.getElementById('timelineSection');
+    const loginPrompt = document.getElementById('loginPrompt');
+
+    // Firestore에 사용자 프로필 저장/업데이트
+    async function saveUserProfile(user) {
+      try {
+        const userRef = doc(db, 'hanilpoint_profiles', user.uid);
+        
+        // 기존 문서 확인
+        const docSnap = await getDoc(userRef);
+        
+        if (!docSnap.exists()) {
+          // 새 사용자인 경우 문서 생성
+          await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName,
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp()
+          });
+          console.log('새 사용자 프로필이 생성되었습니다.');
+        } else {
+          // 기존 사용자인 경우 마지막 로그인 시간만 업데이트
+          await setDoc(userRef, {
+            lastLogin: serverTimestamp()
+          }, { merge: true });
+          console.log('사용자 로그인 시간이 업데이트되었습니다.');
+        }
+      } catch (error) {
+        console.error('사용자 프로필 저장 중 오류:', error);
+      }
+    }
+
+    // UI 업데이트 함수
+    function updateUI(user) {
+      if (user) {
+        // 로그인된 상태
+        loginButton.classList.add('hidden');
+        userInfo.classList.remove('hidden');
+        pointSection.classList.remove('hidden');
+        timelineSection.classList.remove('hidden');
+        loginPrompt.classList.add('hidden');
+
+        // 사용자 정보 표시
+        userPhoto.src = user.photoURL || 'https://placehold.co/50x50';
+        userName.textContent = user.displayName || '사용자';
+        userEmail.textContent = user.email || '';
+
+        // Firestore에 사용자 프로필 저장
+        saveUserProfile(user);
+      } else {
+        // 로그아웃된 상태
+        loginButton.classList.remove('hidden');
+        userInfo.classList.add('hidden');
+        pointSection.classList.add('hidden');
+        timelineSection.classList.add('hidden');
+        loginPrompt.classList.remove('hidden');
+      }
+    }
+
+    // 구글 로그인
+    async function signInWithGoogle() {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        console.log('로그인 성공:', user);
+      } catch (error) {
+        console.error('로그인 실패:', error);
+        alert('로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+    }
+
+    // 로그아웃
+    async function signOutUser() {
+      try {
+        await signOut(auth);
+        console.log('로그아웃 성공');
+      } catch (error) {
+        console.error('로그아웃 실패:', error);
+      }
+    }
+
+    // 인증 상태 변화 감지
+    onAuthStateChanged(auth, (user) => {
+      updateUI(user);
+    });
+
+    // 이벤트 리스너
+    loginButton.addEventListener('click', signInWithGoogle);
+    logoutButton.addEventListener('click', signOutUser);
+
+    // 초기 UI 설정
+    updateUI(null);
+  </script>
 </body>
 </html>
