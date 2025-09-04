@@ -385,47 +385,6 @@
       }
     }
 
-    // 사용자 포인트 가져오기
-    async function getUserPoints(uid) {
-      try {
-        const userRef = doc(window.firebaseDb, 'users', uid);
-        const userSnapshot = await getDoc(userRef);
-        
-        if (userSnapshot.exists()) {
-          return userSnapshot.data().points || 0;
-        }
-        return 0;
-      } catch (error) {
-        console.error('Error getting user points:', error);
-        return 0;
-      }
-    }
-
-    // UI 업데이트
-    async function updateUserUI(user) {
-      if (user) {
-        currentUser = user;
-        authButtonText.textContent = user.displayName || user.email.split('@')[0];
-        authButton.classList.add('user-info-gradient', 'border-none');
-        authButton.querySelector('span').classList.add('text-white');
-        authButton.querySelector('svg').classList.add('text-white');
-        
-        // 포인트 가져오기
-        const points = await getUserPoints(user.uid);
-        userPoints.textContent = points.toLocaleString();
-      } else {
-        currentUser = null;
-        authButtonText.textContent = 'LOGIN';
-        authButton.classList.remove('user-info-gradient', 'border-none');
-        authButton.classList.add('border-2', 'border-[#C5D4F2]');
-        authButton.querySelector('span').classList.remove('text-white');
-        authButton.querySelector('span').classList.add('text-black');
-        authButton.querySelector('svg').classList.remove('text-white');
-        authButton.querySelector('svg').classList.add('text-black');
-        userPoints.textContent = '0';
-      }
-    }
-
     // 로그인 함수
     async function login(email, password) {
       try {
