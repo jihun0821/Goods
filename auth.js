@@ -28,31 +28,51 @@ const loadingSpinner = document.getElementById('loadingSpinner');
 
 let currentUser = null;
 
+// UI 업데이트 함수 (외부에서 참조 가능하도록)
+let updateUserUI;
+
+// 알림 함수 (외부에서 참조 가능하도록)
+let showNotification;
+
+// 로딩 함수 (외부에서 참조 가능하도록) 
+let showLoading;
+
 // 알림 메시지 표시 함수
-function showNotification(message, type = 'info') {
-  notificationMessage.textContent = message;
-  notification.className = `notification ${type}`;
-  notification.classList.add('show');
-  
-  setTimeout(() => {
-    notification.classList.remove('show');
-  }, 5000);
+showNotification = function(message, type = 'info') {
+  if (notificationMessage && notification) {
+    notificationMessage.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 5000);
+  } else {
+    // DOM 요소가 없을 경우 콘솔에 출력
+    console.log(`${type.toUpperCase()}: ${message}`);
+  }
 }
 
 // 로딩 스피너 표시/숨김
-function showLoading(show = true) {
-  loadingSpinner.style.display = show ? 'block' : 'none';
+showLoading = function(show = true) {
+  if (loadingSpinner) {
+    loadingSpinner.style.display = show ? 'block' : 'none';
+  }
 }
 
 // 모달 표시/숨김 함수
 function showModal(modal) {
-  modal.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  if (modal) {
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
 }
 
 function hideModal(modal) {
-  modal.style.display = 'none';
-  document.body.style.overflow = 'auto';
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
 }
 
 // 모든 모달 숨김
@@ -96,10 +116,10 @@ async function createUserProfile(user, additionalData = {}) {
   }
 }
 
-// 사용자 포인트 가져오기
-async function getUserPoints(uid) {
+// 사용자 포인트 조회
+async function getUserPoints(userId) {
   try {
-    const userRef = doc(window.firebaseDb, 'users', uid);
+    const userRef = doc(window.firebaseDb, 'users', userId);
     const userSnapshot = await getDoc(userRef);
     
     if (userSnapshot.exists()) {
@@ -113,20 +133,32 @@ async function getUserPoints(uid) {
 }
 
 // UI 업데이트
-async function updateUserUI(user) {
+updateUserUI = async function(user) {
   if (user) {
     currentUser = user;
-    authButtonText.textContent = user.displayName || user.email.split('@')[0];
-    authButton.classList.add('user-info-button');
+    if (authButtonText) {
+      authButtonText.textContent = user.displayName || user.email.split('@')[0];
+    }
+    if (authButton) {
+      authButton.classList.add('user-info-button');
+    }
     
     // 포인트 가져오기
-    const points = await getUserPoints(user.uid);
-    userPoints.textContent = points.toLocaleString();
+    if (userPoints) {
+      const points = await getUserPoints(user.uid);
+      userPoints.textContent = points.toLocaleString();
+    }
   } else {
     currentUser = null;
-    authButtonText.textContent = 'LOGIN';
-    authButton.classList.remove('user-info-button');
-    userPoints.textContent = '0';
+    if (authButtonText) {
+      authButtonText.textContent = 'LOGIN';
+    }
+    if (authButton) {
+      authButton.classList.remove('user-info-button');
+    }
+    if (userPoints) {
+      userPoints.textContent = '0';
+    }
   }
 }
 
@@ -142,7 +174,12 @@ async function login(email, password) {
     const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
     await createUserProfile(userCredential.user);
     
-    hideAllModals();
+    // 모달 닫기 함수 호출 (ui.js에서 정의되었을 수도 있음)
+    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
+      window.uiFunctions.hideAllModals();
+    } else {
+      hideAllModals();
+    }
     showNotification('로그인되었습니다.', 'success');
   } catch (error) {
     console.error('Login error:', error);
@@ -191,7 +228,12 @@ async function signup(email, password, passwordConfirm) {
     const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
     await createUserProfile(userCredential.user);
     
-    hideAllModals();
+    // 모달 닫기 함수 호출 (ui.js에서 정의되었을 수도 있음)
+    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
+      window.uiFunctions.hideAllModals();
+    } else {
+      hideAllModals();
+    }
     showNotification('회원가입이 완료되었습니다.', 'success');
   } catch (error) {
     console.error('Signup error:', error);
@@ -227,7 +269,13 @@ async function resetPassword(email) {
     }
     
     await sendPasswordResetEmail(window.firebaseAuth, email);
-    hideAllModals();
+    
+    // 모달 닫기 함수 호출 (ui.js에서 정의되었을 수도 있음)
+    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
+      window.uiFunctions.hideAllModals();
+    } else {
+      hideAllModals();
+    }
     showNotification('비밀번호 재설정 이메일이 발송되었습니다.', 'success');
   } catch (error) {
     console.error('Password reset error:', error);
@@ -265,8 +313,29 @@ async function logout() {
 }
 
 // 사용자 인증 상태 변경 리스너
-onAuthStateChanged(window.firebaseAuth, (user) => {
-  updateUserUI(user);
+onAuthStateChanged(window.firebaseAuth, async (user) => {
+  currentUser = user;
+  
+  if (user) {
+    // 사용자가 로그인된 상태
+    console.log('User logged in:', user.email);
+    
+    // UI 업데이트 함수가 로드되었을 때 호출
+    if (updateUserUI) {
+      updateUserUI(user);
+    } else {
+      // UI 함수가 아직 로드되지 않았다면 잠시 후 다시 시도
+      setTimeout(() => {
+        if (updateUserUI) updateUserUI(user);
+      }, 100);
+    }
+  } else {
+    // 사용자가 로그아웃된 상태
+    console.log('User logged out');
+    if (updateUserUI) {
+      updateUserUI(null);
+    }
+  }
 });
 
 // 이벤트 리스너 설정
@@ -301,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Enter 키로 로그인
   document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      document.getElementById('doLogin').click();
+      document.getElementById('doLogin')?.click();
     }
   });
 
@@ -371,22 +440,24 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // 모달이 열릴 때 폼 초기화
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        const target = mutation.target;
-        if (target.style.display === 'block') {
-          if (target.id === 'loginModal') clearForm('loginModal');
-          if (target.id === 'signupModal') clearForm('signupModal');
-          if (target.id === 'passwordResetModal') clearForm('passwordResetModal');
+  if (loginModal && signupModal && passwordResetModal) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const target = mutation.target;
+          if (target.style.display === 'block') {
+            if (target.id === 'loginModal') clearForm('loginModal');
+            if (target.id === 'signupModal') clearForm('signupModal');
+            if (target.id === 'passwordResetModal') clearForm('passwordResetModal');
+          }
         }
-      }
+      });
     });
-  });
 
-  observer.observe(loginModal, { attributes: true });
-  observer.observe(signupModal, { attributes: true });
-  observer.observe(passwordResetModal, { attributes: true });
+    observer.observe(loginModal, { attributes: true });
+    observer.observe(signupModal, { attributes: true });
+    observer.observe(passwordResetModal, { attributes: true });
+  }
 });
 
 // 전역 함수로 내보내기 (다른 스크립트에서 사용할 수 있도록)
@@ -397,5 +468,16 @@ window.authFunctions = {
   resetPassword,
   getCurrentUser: () => currentUser,
   getUserPoints,
-  showNotification
+  showNotification,
+  updateUserUI,
+  showLoading,
+  hideAllModals
+};
+
+// UI 함수들을 전역에서도 접근 가능하도록 설정
+window.uiFunctions = {
+  hideAllModals,
+  showNotification,
+  showLoading,
+  updateUserUI
 };
