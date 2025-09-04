@@ -12,7 +12,36 @@
   <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
   
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Custom animations and gradients */
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .modal-slide-in {
+      animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    .spinner-animation {
+      animation: spin 1s linear infinite;
+    }
+    
+    .user-info-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+  </style>
 </head>
 <body class="bg-white flex flex-col md:flex-row">
 
@@ -125,77 +154,545 @@
   </main>
 
   <!-- 로그인 모달 -->
-  <div id="loginModal" class="auth-modal">
-    <div class="auth-modal-content">
-      <span class="auth-modal-close" id="closeLoginModal">&times;</span>
+  <div id="loginModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeLoginModal">&times;</span>
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">로그인</h2>
-      <div class="auth-form space-y-4">
+      <div class="space-y-4">
         <input id="loginEmail" type="email" placeholder="아이디(이메일)" autocomplete="username" name="email" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
         <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password" name="password" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <button id="doLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <button id="doLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
           로그인
         </button>
       </div>
       <div class="flex justify-between mt-6 text-sm">
-        <a href="#" id="openSignupLink" class="text-blue-500 hover:text-blue-600 underline">가입하기</a>
-        <a href="#" id="openPasswordResetLink" class="text-blue-500 hover:text-blue-600">비밀번호를 잊어버리셨나요?</a>
+        <a href="#" id="openSignupLink" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-200">가입하기</a>
+        <a href="#" id="openPasswordResetLink" class="text-blue-500 hover:text-blue-600 transition-colors duration-200">비밀번호를 잊어버리셨나요?</a>
       </div>
     </div>
   </div>
 
   <!-- 회원가입 모달 -->
-  <div id="signupModal" class="auth-modal">
-    <div class="auth-modal-content">
-      <span class="auth-modal-close" id="closeSignupModal">&times;</span>
+  <div id="signupModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeSignupModal">&times;</span>
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">회원가입</h2>
-      <div class="auth-form space-y-4">
+      <div class="space-y-4">
         <input id="signupEmail" type="email" placeholder="이메일 (@hanilgo.cnehs.kr)" name="email" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
         <input id="signupPassword" type="password" placeholder="비밀번호 (6자 이상)" name="password" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
         <input id="signupPasswordConfirm" type="password" placeholder="비밀번호 확인" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <button id="doSignup" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <button id="doSignup" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
           회원가입
         </button>
       </div>
       <div class="flex justify-end mt-6">
-        <a href="#" id="backToLoginLink" class="text-blue-500 hover:text-blue-600 underline text-sm">로그인으로 돌아가기</a>
+        <a href="#" id="backToLoginLink" class="text-blue-500 hover:text-blue-600 underline text-sm transition-colors duration-200">로그인으로 돌아가기</a>
       </div>
     </div>
   </div>
 
   <!-- 비밀번호 재설정 모달 -->
-  <div id="passwordResetModal" class="auth-modal">
-    <div class="auth-modal-content">
-      <span class="auth-modal-close" id="closePasswordResetModal">&times;</span>
+  <div id="passwordResetModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closePasswordResetModal">&times;</span>
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">비밀번호 찾기</h2>
-      <div class="auth-form space-y-4">
+      <div class="space-y-4">
         <input id="resetEmail" type="email" placeholder="가입한 이메일 주소" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <button id="doPasswordReset" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <button id="doPasswordReset" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
           비밀번호 재설정 이메일 발송
         </button>
       </div>
       <div class="flex justify-end mt-6">
-        <a href="#" id="backToLoginFromResetLink" class="text-blue-500 hover:text-blue-600 underline text-sm">로그인으로 돌아가기</a>
+        <a href="#" id="backToLoginFromResetLink" class="text-blue-500 hover:text-blue-600 underline text-sm transition-colors duration-200">로그인으로 돌아가기</a>
       </div>
     </div>
   </div>
 
   <!-- 알림 메시지 -->
-  <div id="notification" class="notification">
+  <div id="notification" class="fixed top-5 right-5 z-[2000] p-4 rounded-lg font-medium shadow-lg min-w-[200px] transform translate-x-[400px] transition-transform duration-300 ease-out max-md:right-3 max-md:left-3 max-md:transform max-md:-translate-y-[100px] max-md:translate-x-0 max-md:transition-transform max-md:duration-300 max-md:ease-out">
     <span id="notificationMessage"></span>
   </div>
 
   <!-- 로딩 스피너 -->
-  <div id="loadingSpinner" class="loading-spinner">
-    <div class="spinner"></div>
+  <div id="loadingSpinner" class="hidden fixed z-[3000] left-0 top-0 w-full h-full bg-white/80 backdrop-blur-sm">
+    <div class="absolute left-1/2 top-1/2 w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full spinner-animation"></div>
   </div>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script type="module" src="auth.js"></script>
-</body>
-</html>
+  <!-- Firebase 초기화 스크립트 -->
+  <script type="module">
+    // Firebase 설정 및 초기화
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // Firebase 설정 객체
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_YES_I20XByZpXjCN2p1Vp5gueS4Op24",
+      authDomain: "hsp-auth-22845.firebaseapp.com",
+      projectId: "hsp-auth-22845",
+      storageBucket: "hsp-auth-22845.firebasestorage.app",
+      messagingSenderId: "1034282361573",
+      appId: "1:1034282361573:web:a15b970a18ae7033552a0c",
+    };
+
+    // Firebase 앱 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 전역에서 사용할 수 있도록 export
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+
+    console.log('Firebase initialized with hanilpoint database');
+  </script>
+
+  <!-- 인증 스크립트 -->
+  <script type="module">
+    // Firebase Auth 모듈 import
+    import { 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      sendPasswordResetEmail,
+      signOut,
+      onAuthStateChanged,
+      updateProfile
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    import { 
+      doc, 
+      setDoc, 
+      getDoc,
+      serverTimestamp 
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // DOM 요소 가져오기
+    const loginModal = document.getElementById('loginModal');
+    const signupModal = document.getElementById('signupModal');
+    const passwordResetModal = document.getElementById('passwordResetModal');
+    const authButton = document.getElementById('authButton');
+    const authButtonText = document.getElementById('authButtonText');
+    const userPoints = document.getElementById('userPoints');
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    let currentUser = null;
+
+    // 알림 메시지 표시 함수
+    function showNotification(message, type = 'info') {
+      notificationMessage.textContent = message;
+      notification.className = `fixed top-5 right-5 z-[2000] p-4 rounded-lg font-medium shadow-lg min-w-[200px] transform transition-transform duration-300 ease-out max-md:right-3 max-md:left-3 max-md:transform max-md:translate-x-0 max-md:transition-transform max-md:duration-300 max-md:ease-out`;
+      
+      // 타입별 색상 적용
+      if (type === 'success') {
+        notification.classList.add('bg-emerald-500', 'text-white');
+      } else if (type === 'error') {
+        notification.classList.add('bg-red-500', 'text-white');
+      } else {
+        notification.classList.add('bg-blue-500', 'text-white');
+      }
+      
+      // 모바일에서는 translateY, 데스크톱에서는 translateX 사용
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        notification.classList.remove('-translate-y-[100px]');
+        notification.classList.add('translate-y-0');
+      } else {
+        notification.classList.remove('translate-x-[400px]');
+        notification.classList.add('translate-x-0');
+      }
+      
+      setTimeout(() => {
+        if (isMobile) {
+          notification.classList.remove('translate-y-0');
+          notification.classList.add('-translate-y-[100px]');
+        } else {
+          notification.classList.remove('translate-x-0');
+          notification.classList.add('translate-x-[400px]');
+        }
+      }, 5000);
+    }
+
+    // 로딩 스피너 표시/숨김
+    function showLoading(show = true) {
+      if (show) {
+        loadingSpinner.classList.remove('hidden');
+        loadingSpinner.classList.add('block');
+      } else {
+        loadingSpinner.classList.add('hidden');
+        loadingSpinner.classList.remove('block');
+      }
+    }
+
+    // 모달 표시/숨김 함수
+    function showModal(modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('block');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideModal(modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('block');
+      document.body.style.overflow = 'auto';
+    }
+
+    // 모든 모달 숨김
+    function hideAllModals() {
+      hideModal(loginModal);
+      hideModal(signupModal);
+      hideModal(passwordResetModal);
+    }
+
+    // 이메일 유효성 검사
+    function isValidHanilEmail(email) {
+      return email.endsWith('@hanilgo.cnehs.kr');
+    }
+
+    // 사용자 데이터를 Firestore에 저장
+    async function createUserProfile(user, additionalData = {}) {
+      try {
+        const userRef = doc(window.firebaseDb, 'users', user.uid);
+        const userSnapshot = await getDoc(userRef);
+        
+        if (!userSnapshot.exists()) {
+          const { displayName, email, uid } = user;
+          const createdAt = serverTimestamp();
+          
+          await setDoc(userRef, {
+            uid,
+            displayName: displayName || email.split('@')[0],
+            email,
+            points: 0,
+            createdAt,
+            ...additionalData
+          });
+          
+          console.log('User profile created in hanilpoint database');
+        }
+        
+        return userRef;
+      } catch (error) {
+        console.error('Error creating user profile:', error);
+        throw error;
+      }
+    }
+
+    // 사용자 포인트 가져오기
+    async function getUserPoints(uid) {
+      try {
+        const userRef = doc(window.firebaseDb, 'users', uid);
+        const userSnapshot = await getDoc(userRef);
+        
+        if (userSnapshot.exists()) {
+          return userSnapshot.data().points || 0;
+        }
+        return 0;
+      } catch (error) {
+        console.error('Error getting user points:', error);
+        return 0;
+      }
+    }
+
+    // UI 업데이트
+    async function updateUserUI(user) {
+      if (user) {
+        currentUser = user;
+        authButtonText.textContent = user.displayName || user.email.split('@')[0];
+        authButton.classList.add('user-info-gradient', 'border-none');
+        authButton.querySelector('span').classList.add('text-white');
+        authButton.querySelector('svg').classList.add('text-white');
+        
+        // 포인트 가져오기
+        const points = await getUserPoints(user.uid);
+        userPoints.textContent = points.toLocaleString();
+      } else {
+        currentUser = null;
+        authButtonText.textContent = 'LOGIN';
+        authButton.classList.remove('user-info-gradient', 'border-none');
+        authButton.classList.add('border-2', 'border-[#C5D4F2]');
+        authButton.querySelector('span').classList.remove('text-white');
+        authButton.querySelector('span').classList.add('text-black');
+        authButton.querySelector('svg').classList.remove('text-white');
+        authButton.querySelector('svg').classList.add('text-black');
+        userPoints.textContent = '0';
+      }
+    }
+
+    // 로그인 함수
+    async function login(email, password) {
+      try {
+        showLoading(true);
+        
+        if (!isValidHanilEmail(email)) {
+          throw new Error('한일고등학교 이메일(@hanilgo.cnehs.kr)만 사용 가능합니다.');
+        }
+        
+        const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+        await createUserProfile(userCredential.user);
+        
+        hideAllModals();
+        showNotification('로그인되었습니다.', 'success');
+      } catch (error) {
+        console.error('Login error:', error);
+        let errorMessage = '로그인에 실패했습니다.';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = '등록되지 않은 이메일입니다.';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = '비밀번호가 올바르지 않습니다.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = '올바른 이메일 형식이 아닙니다.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        
+        showNotification(errorMessage, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 회원가입 함수
+    async function signup(email, password, passwordConfirm) {
+      try {
+        showLoading(true);
+        
+        if (!isValidHanilEmail(email)) {
+          throw new Error('한일고등학교 이메일(@hanilgo.cnehs.kr)만 사용 가능합니다.');
+        }
+        
+        if (password.length < 6) {
+          throw new Error('비밀번호는 6자 이상이어야 합니다.');
+        }
+        
+        if (password !== passwordConfirm) {
+          throw new Error('비밀번호가 일치하지 않습니다.');
+        }
+        
+        const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+        await createUserProfile(userCredential.user);
+        
+        hideAllModals();
+        showNotification('회원가입이 완료되었습니다.', 'success');
+      } catch (error) {
+        console.error('Signup error:', error);
+        let errorMessage = '회원가입에 실패했습니다.';
+        
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = '이미 사용 중인 이메일입니다.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = '올바른 이메일 형식이 아닙니다.';
+            break;
+          case 'auth/weak-password':
+            errorMessage = '비밀번호가 너무 약합니다.';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        
+        showNotification(errorMessage, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 비밀번호 재설정 함수
+    async function resetPassword(email) {
+      try {
+        showLoading(true);
+        
+        if (!isValidHanilEmail(email)) {
+          throw new Error('한일고등학교 이메일(@hanilgo.cnehs.kr)만 사용 가능합니다.');
+        }
+        
+        await sendPasswordResetEmail(window.firebaseAuth, email);
+        hideAllModals();
+        showNotification('비밀번호 재설정 이메일이 발송되었습니다.', 'success');
+      } catch (error) {
+        console.error('Password reset error:', error);
+        let errorMessage = '이메일 발송에 실패했습니다.';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = '등록되지 않은 이메일입니다.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = '올바른 이메일 형식이 아닙니다.';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        
+        showNotification(errorMessage, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 로그아웃 함수
+    async function logout() {
+      try {
+        showLoading(true);
+        await signOut(window.firebaseAuth);
+        showNotification('로그아웃되었습니다.', 'success');
+      } catch (error) {
+        console.error('Logout error:', error);
+        showNotification('로그아웃에 실패했습니다.', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // 사용자 인증 상태 변경 리스너
+    onAuthStateChanged(window.firebaseAuth, (user) => {
+      updateUserUI(user);
+    });
+
+    // 이벤트 리스너 설정
+    document.addEventListener('DOMContentLoaded', () => {
+      // 인증 버튼 클릭
+      authButton?.addEventListener('click', () => {
+        if (currentUser) {
+          // 로그인된 상태 - 로그아웃 확인
+          if (confirm('로그아웃하시겠습니까?')) {
+            logout();
+          }
+        } else {
+          // 로그아웃 상태 - 로그인 모달 표시
+          showModal(loginModal);
+        }
+      });
+
+      // 로그인 모달 이벤트
+      document.getElementById('closeLoginModal')?.addEventListener('click', () => hideModal(loginModal));
+      document.getElementById('doLogin')?.addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || !password) {
+          showNotification('이메일과 비밀번호를 입력해주세요.', 'error');
+          return;
+        }
+        
+        login(email, password);
+      });
+      
+      // Enter 키로 로그인
+      document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('doLogin').click();
+        }
+      });
+
+      // 회원가입 모달 이벤트
+      document.getElementById('openSignupLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideModal(loginModal);
+        showModal(signupModal);
+      });
+      
+      document.getElementById('closeSignupModal')?.addEventListener('click', () => hideModal(signupModal));
+      document.getElementById('doSignup')?.addEventListener('click', () => {
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+        
+        if (!email || !password || !passwordConfirm) {
+          showNotification('모든 필드를 입력해주세요.', 'error');
+          return;
+        }
+        
+        signup(email, password, passwordConfirm);
+      });
+      
+      document.getElementById('backToLoginLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideModal(signupModal);
+        showModal(loginModal);
+      });
+
+      // 비밀번호 재설정 모달 이벤트
+      document.getElementById('openPasswordResetLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideModal(loginModal);
+        showModal(passwordResetModal);
+      });
+      
+      document.getElementById('closePasswordResetModal')?.addEventListener('click', () => hideModal(passwordResetModal));
+      document.getElementById('doPasswordReset')?.addEventListener('click', () => {
+        const email = document.getElementById('resetEmail').value.trim();
+        
+        if (!email) {
+          showNotification('이메일을 입력해주세요.', 'error');
+          return;
+        }
+        
+        resetPassword(email);
+      });
+      
+      document.getElementById('backToLoginFromResetLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideModal(passwordResetModal);
+        showModal(loginModal);
+      });
+
+      // 모달 외부 클릭 시 닫기
+      window.addEventListener('click', (e) => {
+        if (e.target === loginModal) hideModal(loginModal);
+        if (e.target === signupModal) hideModal(signupModal);
+        if (e.target === passwordResetModal) hideModal(passwordResetModal);
+      });
+
+      // 폼 입력 필드 초기화
+      const clearForm = (formId) => {
+        const inputs = document.querySelectorAll(`#${formId} input`);
+        inputs.forEach(input => input.value = '');
+      };
+
+      // 모달이 열릴 때 폼 초기화
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const target = mutation.target;
+            if (!target.classList.contains('hidden')) {
+              if (target.id === 'loginModal') clearForm('loginModal');
+              if (target.id === 'signupModal') clearForm('signupModal');
+              if (target.id === 'passwordResetModal') clearForm('passwordResetModal');
+            }
+          }
+        });
+      });
+
+      observer.observe(loginModal, { attributes: true });
+      observer.observe(signupModal, { attributes: true });
+      observer.observe(passwordResetModal, { attributes: true });
+    });
+
+    // 전역 함수로 내보내기 (다른 스크립트에서 사용할 수 있도록)
+    window.authFunctions = {
+      login,
+      signup,
+      logout,
+      resetPassword,
+      getCurrentUser: () => currentUser,
+      getUserPoints,
+      showNotification
+    };
+  </script>
