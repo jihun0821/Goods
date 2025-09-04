@@ -1,7 +1,7 @@
 // Firebase 설정 및 초기화
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // Firebase 설정 객체
 const firebaseConfig = {
@@ -15,6 +15,8 @@ const firebaseConfig = {
 
 // Firebase 앱 초기화
 const app = initializeApp(firebaseConfig);
+
+// hanilpoint 데이터베이스 사용을 위한 설정
 const auth = getAuth(app);
 const db = getFirestore(app);
 
