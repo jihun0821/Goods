@@ -15,16 +15,52 @@ import {
   serverTimestamp 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+// DOM 요소 가져오기
+const loginModal = document.getElementById('loginModal');
+const signupModal = document.getElementById('signupModal');
+const passwordResetModal = document.getElementById('passwordResetModal');
+const authButton = document.getElementById('authButton');
+const authButtonText = document.getElementById('authButtonText');
+const userPoints = document.getElementById('userPoints');
+const notification = document.getElementById('notification');
+const notificationMessage = document.getElementById('notificationMessage');
+const loadingSpinner = document.getElementById('loadingSpinner');
+
 let currentUser = null;
 
-// UI 업데이트 함수 (ui.js에서 정의)
-let updateUserUI;
+// 알림 메시지 표시 함수
+function showNotification(message, type = 'info') {
+  notificationMessage.textContent = message;
+  notification.className = `notification ${type}`;
+  notification.classList.add('show');
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 5000);
+}
 
-// 알림 함수 (ui.js에서 정의)
-let showNotification;
+// 로딩 스피너 표시/숨김
+function showLoading(show = true) {
+  loadingSpinner.style.display = show ? 'block' : 'none';
+}
 
-// 로딩 함수 (ui.js에서 정의) 
-let showLoading;
+// 모달 표시/숨김 함수
+function showModal(modal) {
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function hideModal(modal) {
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// 모든 모달 숨김
+function hideAllModals() {
+  hideModal(loginModal);
+  hideModal(signupModal);
+  hideModal(passwordResetModal);
+}
 
 // 이메일 유효성 검사
 function isValidHanilEmail(email) {
@@ -60,10 +96,10 @@ async function createUserProfile(user, additionalData = {}) {
   }
 }
 
-// 사용자 포인트 조회
-async function getUserPoints(userId) {
+// 사용자 포인트 가져오기
+async function getUserPoints(uid) {
   try {
-    const userRef = doc(window.firebaseDb, 'users', userId);
+    const userRef = doc(window.firebaseDb, 'users', uid);
     const userSnapshot = await getDoc(userRef);
     
     if (userSnapshot.exists()) {
@@ -73,6 +109,24 @@ async function getUserPoints(userId) {
   } catch (error) {
     console.error('Error getting user points:', error);
     return 0;
+  }
+}
+
+// UI 업데이트
+async function updateUserUI(user) {
+  if (user) {
+    currentUser = user;
+    authButtonText.textContent = user.displayName || user.email.split('@')[0];
+    authButton.classList.add('user-info-button');
+    
+    // 포인트 가져오기
+    const points = await getUserPoints(user.uid);
+    userPoints.textContent = points.toLocaleString();
+  } else {
+    currentUser = null;
+    authButtonText.textContent = 'LOGIN';
+    authButton.classList.remove('user-info-button');
+    userPoints.textContent = '0';
   }
 }
 
@@ -88,10 +142,7 @@ async function login(email, password) {
     const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
     await createUserProfile(userCredential.user);
     
-    // 모달 닫기 함수 호출 (ui.js에서 정의)
-    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
-      window.uiFunctions.hideAllModals();
-    }
+    hideAllModals();
     showNotification('로그인되었습니다.', 'success');
   } catch (error) {
     console.error('Login error:', error);
@@ -140,10 +191,7 @@ async function signup(email, password, passwordConfirm) {
     const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
     await createUserProfile(userCredential.user);
     
-    // 모달 닫기 함수 호출 (ui.js에서 정의)
-    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
-      window.uiFunctions.hideAllModals();
-    }
+    hideAllModals();
     showNotification('회원가입이 완료되었습니다.', 'success');
   } catch (error) {
     console.error('Signup error:', error);
@@ -179,11 +227,7 @@ async function resetPassword(email) {
     }
     
     await sendPasswordResetEmail(window.firebaseAuth, email);
-    
-    // 모달 닫기 함수 호출 (ui.js에서 정의)
-    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
-      window.uiFunctions.hideAllModals();
-    }
+    hideAllModals();
     showNotification('비밀번호 재설정 이메일이 발송되었습니다.', 'success');
   } catch (error) {
     console.error('Password reset error:', error);
@@ -221,18 +265,137 @@ async function logout() {
 }
 
 // 사용자 인증 상태 변경 리스너
-onAuthStateChanged(window.firebaseAuth, async (user) => {
-  currentUser = user;
-  
-  if (user) {
-    // 사용자가 로그인된 상태
-    console.log('User logged in:', user.email);
-    
-    // UI 업데이트 함수가 로드되었을 때 호출
-    if (updateUserUI) {
-      updateUserUI(user);
+onAuthStateChanged(window.firebaseAuth, (user) => {
+  updateUserUI(user);
+});
+
+// 이벤트 리스너 설정
+document.addEventListener('DOMContentLoaded', () => {
+  // 인증 버튼 클릭
+  authButton?.addEventListener('click', () => {
+    if (currentUser) {
+      // 로그인된 상태 - 로그아웃 확인
+      if (confirm('로그아웃하시겠습니까?')) {
+        logout();
+      }
     } else {
-      // UI 함수가 아직 로드되지 않았다면 잠시 후 다시 시도
-      setTimeout(() => {
-        if (updateUserUI) updateUserUI(user);
-      }, 100);
+      // 로그아웃 상태 - 로그인 모달 표시
+      showModal(loginModal);
+    }
+  });
+
+  // 로그인 모달 이벤트
+  document.getElementById('closeLoginModal')?.addEventListener('click', () => hideModal(loginModal));
+  document.getElementById('doLogin')?.addEventListener('click', () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+      showNotification('이메일과 비밀번호를 입력해주세요.', 'error');
+      return;
+    }
+    
+    login(email, password);
+  });
+  
+  // Enter 키로 로그인
+  document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      document.getElementById('doLogin').click();
+    }
+  });
+
+  // 회원가입 모달 이벤트
+  document.getElementById('openSignupLink')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideModal(loginModal);
+    showModal(signupModal);
+  });
+  
+  document.getElementById('closeSignupModal')?.addEventListener('click', () => hideModal(signupModal));
+  document.getElementById('doSignup')?.addEventListener('click', () => {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+    
+    if (!email || !password || !passwordConfirm) {
+      showNotification('모든 필드를 입력해주세요.', 'error');
+      return;
+    }
+    
+    signup(email, password, passwordConfirm);
+  });
+  
+  document.getElementById('backToLoginLink')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideModal(signupModal);
+    showModal(loginModal);
+  });
+
+  // 비밀번호 재설정 모달 이벤트
+  document.getElementById('openPasswordResetLink')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideModal(loginModal);
+    showModal(passwordResetModal);
+  });
+  
+  document.getElementById('closePasswordResetModal')?.addEventListener('click', () => hideModal(passwordResetModal));
+  document.getElementById('doPasswordReset')?.addEventListener('click', () => {
+    const email = document.getElementById('resetEmail').value.trim();
+    
+    if (!email) {
+      showNotification('이메일을 입력해주세요.', 'error');
+      return;
+    }
+    
+    resetPassword(email);
+  });
+  
+  document.getElementById('backToLoginFromResetLink')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideModal(passwordResetModal);
+    showModal(loginModal);
+  });
+
+  // 모달 외부 클릭 시 닫기
+  window.addEventListener('click', (e) => {
+    if (e.target === loginModal) hideModal(loginModal);
+    if (e.target === signupModal) hideModal(signupModal);
+    if (e.target === passwordResetModal) hideModal(passwordResetModal);
+  });
+
+  // 폼 입력 필드 초기화
+  const clearForm = (formId) => {
+    const inputs = document.querySelectorAll(`#${formId} input`);
+    inputs.forEach(input => input.value = '');
+  };
+
+  // 모달이 열릴 때 폼 초기화
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        const target = mutation.target;
+        if (target.style.display === 'block') {
+          if (target.id === 'loginModal') clearForm('loginModal');
+          if (target.id === 'signupModal') clearForm('signupModal');
+          if (target.id === 'passwordResetModal') clearForm('passwordResetModal');
+        }
+      }
+    });
+  });
+
+  observer.observe(loginModal, { attributes: true });
+  observer.observe(signupModal, { attributes: true });
+  observer.observe(passwordResetModal, { attributes: true });
+});
+
+// 전역 함수로 내보내기 (다른 스크립트에서 사용할 수 있도록)
+window.authFunctions = {
+  login,
+  signup,
+  logout,
+  resetPassword,
+  getCurrentUser: () => currentUser,
+  getUserPoints,
+  showNotification
+};
