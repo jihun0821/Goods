@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hanil Point</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  
+  <!-- Firebase SDK -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-white flex flex-col md:flex-row">
 
@@ -29,15 +37,15 @@
     <!-- Menu -->
     <div class="space-y-1">
       <div class="h-10 px-4 flex items-center gap-4 rounded-lg bg-neutral-100 cursor-pointer">
-        <img src="https://placehold.co/15x15" alt="icon" class="w-[25px] h-[25px]" />
+        <img src="/HanilPoint/images/HOME.png" alt="icon" class="w-[25px] h-[25px]" />
         <span class="flex-1 text-center text-black font-medium text-base">홈</span>
       </div>
       <div class="h-10 px-4 flex items-center gap-4 rounded-lg cursor-pointer">
-        <img src="https://placehold.co/15x15" alt="icon" class="w-[25px] h-[25px]" />
+        <img src="/HanilPoint/images/BOARD.png" alt="icon" class="w-[25px] h-[25px]" />
         <span class="flex-1 text-center text-black font-medium text-base">게시판</span>
       </div>
       <div class="h-10 px-4 flex items-center gap-4 rounded-lg cursor-pointer">
-        <img src="https://placehold.co/15x15" alt="icon" class="w-[25px] h-[25px]" />
+        <img src="/HanilPoint/images/BUY.png" alt="icon" class="w-[25px] h-[25px]" />
         <span class="flex-1 text-center text-black font-medium text-base">공동구매</span>
       </div>
     </div>
@@ -67,38 +75,33 @@
           </div>
         </div>
 
-        <!-- User Box / Login Button -->
-        <div id="loginContainer" class="w-full md:w-72 h-16 bg-zinc-100 rounded-3xl backdrop-blur-[2px] relative flex items-center justify-center px-4 flex-shrink-0">
-          <!-- 로그인 버튼 (기본) -->
-          <button id="loginButton" class="w-full h-full bg-blue-500 hover:bg-blue-600 rounded-3xl text-white font-semibold transition-colors">
-            구글로 로그인
-          </button>
-          
-          <!-- 사용자 정보 (로그인 후) -->
-          <div id="userInfo" class="hidden flex items-center gap-3 w-full">
-            <img id="userPhoto" class="w-12 h-12 rounded-full" alt="user" />
-            <div class="flex flex-col">
-              <div id="userName" class="text-base font-semibold text-black"></div>
-              <div id="userEmail" class="text-xs font-semibold text-black"></div>
+        <!-- Login/User Info Button -->
+        <div id="authButton" class="w-full md:w-72 h-16 bg-white border-2 border-[#C5D4F2] rounded-3xl flex items-center justify-center px-4 flex-shrink-0 cursor-pointer hover:shadow-lg transition-all duration-300">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-zinc-300/90 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4m-5-4l4-4m0 0l-4-4m4 4H3"></path>
+              </svg>
             </div>
-            <button id="logoutButton" class="absolute top-2 right-4 text-xs text-red-500 hover:text-red-700">
-              로그아웃
-            </button>
+            <span id="authButtonText" class="text-black font-semibold text-lg">LOGIN</span>
           </div>
         </div>
       </div>
 
       <!-- 나의 POINT 영역 -->
-      <div id="pointSection" class="w-full h-48 relative flex-shrink-0 hidden">
+      <div class="w-full h-48 relative flex-shrink-0">
         <div class="w-full h-48 absolute bg-[#CFDFFF] rounded-3xl backdrop-blur-[2px]"></div>
         <div class="absolute top-4 left-6 text-black text-base font-semibold">나의 POINT</div>
         <div class="absolute top-16 left-6 flex items-center gap-4">
           <img class="w-12 h-12" src="/HanilPoint/images/HP2.png" alt="icon" />
-          <span class="text-black text-4xl font-semibold relative -top-[3.5px]">0</span>
+          <span id="userPoints" class="text-black text-4xl font-semibold relative -top-[3.5px]">0</span>
         </div>
         <div class="absolute top-[154px] flex gap-4 left-6">
           <a href="https://forms.gle/AvfzgkPAgHfFFMue8" class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black">충전(현금)</a>
-          <a class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black">충전(이체)</a>
+          <a id="toss-payment-btn" 
+             class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black cursor-pointer">
+             충전(이체)
+          </a>
           <a class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black">송금</a>
         </div>
         <div class="absolute top-[139px] left-6 w-[calc(100%-48px)] h-[2px] bg-[#C5D4F2]"></div>
@@ -106,181 +109,93 @@
       </div>
     </div>
 
-    <!-- 타임라인 영역 (로그인 후에만 표시) -->
-    <div id="timelineSection" class="hidden flex-1 space-y-4 overflow-y-hidden">
-      <div class="flex items-center gap-2 mb-4">
-        <div class="text-black font-semibold text-base">Time Line</div>
-        <div class="w-24 h-6 bg-neutral-100 rounded-3xl flex items-center justify-center cursor-pointer text-sm">전체 보기</div>
-      </div>
+    <!-- 타임라인 영역 (빈 상태) -->
+    <div class="flex items-center gap-2 mb-4">
+      <div class="text-black font-semibold text-base">Time Line</div>
+      <div class="w-24 h-6 bg-neutral-100 rounded-3xl flex items-center justify-center cursor-pointer text-sm">전체 보기</div>
+    </div>
 
-      <div class="space-y-4">
-        <div class="bg-zinc-100 rounded-3xl p-4 backdrop-blur-[2px]">
-          <div class="flex justify-between items-center mb-1">
-            <span class="font-semibold">20241107(남현주) → 20241116(임지훈) :</span>
-            <span class="text-red-500 font-semibold">5,000 HP</span>
-          </div>
-          <div class="text-right text-neutral-500 text-xs">24.08.09</div>
-        </div>
-
-        <div class="bg-zinc-100 rounded-3xl p-4 backdrop-blur-[2px]">
-          <div class="flex justify-between items-center mb-1">
-            <span class="font-semibold">공동구매(굿즈/볼펜) :</span>
-            <span class="text-red-500 font-semibold">7,200 HP</span>
-          </div>
-          <div class="text-right text-neutral-500 text-xs">24.08.09</div>
-        </div>
-
-        <div class="bg-zinc-100 rounded-3xl p-4 backdrop-blur-[2px]">
-          <div class="flex justify-between items-center mb-1">
-            <span class="font-semibold">충전(현금) :</span>
-            <span class="text-lime-600 font-semibold">10,000 HP</span>
-          </div>
-          <div class="text-right text-neutral-500 text-xs">24.08.07</div>
-        </div>
-
-        <div class="bg-zinc-100 rounded-3xl p-4 backdrop-blur-[2px]">
-          <div class="flex justify-between items-center mb-1">
-            <span class="font-semibold">충전(이체) :</span>
-            <span class="text-lime-600 font-semibold">5,000 HP</span>
-          </div>
-          <div class="text-right text-neutral-500 text-xs">24.08.06</div>
-        </div>
+    <div class="flex-1 flex items-center justify-center">
+      <div class="empty-notice flex flex-col items-center justify-center space-y-3 text-center py-12">
+        <div class="empty-notice-icon text-4xl">📋</div>
+        <div class="empty-notice-text text-neutral-500 font-medium">아직 타임라인이 존재하지 않습니다</div>
       </div>
     </div>
 
-    <!-- 로그인 안내 메시지 (로그인 전) -->
-    <div id="loginPrompt" class="flex-1 flex items-center justify-center">
-      <div class="text-center">
-        <h2 class="text-xl font-semibold text-gray-600 mb-2">Hanil Point에 오신 것을 환영합니다!</h2>
-        <p class="text-gray-500">구글 계정으로 로그인하여 서비스를 이용해보세요.</p>
-      </div>
-    </div>
   </main>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    // Firebase 설정 및 초기화
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+  <!-- 로그인 모달 -->
+  <div id="loginModal" class="auth-modal">
+    <div class="auth-modal-content">
+      <span class="auth-modal-close" id="closeLoginModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">로그인</h2>
+      <div class="auth-form space-y-4">
+        <input id="loginEmail" type="email" placeholder="아이디(이메일)" autocomplete="username" name="email" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password" name="password" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <button id="doLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+          로그인
+        </button>
+      </div>
+      <div class="flex justify-between mt-6 text-sm">
+        <a href="#" id="openSignupLink" class="text-blue-500 hover:text-blue-600 underline">가입하기</a>
+        <a href="#" id="openPasswordResetLink" class="text-blue-500 hover:text-blue-600">비밀번호를 잊어버리셨나요?</a>
+      </div>
+    </div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC_YES_I20XByZpXjCN2p1Vp5gueS4Op24",
-      authDomain: "hsp-auth-22845.firebaseapp.com",
-      projectId: "hsp-auth-22845",
-      storageBucket: "hsp-auth-22845.firebasestorage.app",
-      messagingSenderId: "1034282361573",
-      appId: "1:1034282361573:web:a15b970a18ae7033552a0c",
-      measurementId: "G-EQZ1QFGDZ2"
-    };
+  <!-- 회원가입 모달 -->
+  <div id="signupModal" class="auth-modal">
+    <div class="auth-modal-content">
+      <span class="auth-modal-close" id="closeSignupModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">회원가입</h2>
+      <div class="auth-form space-y-4">
+        <input id="signupEmail" type="email" placeholder="이메일 (@hanilgo.cnehs.kr)" name="email" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input id="signupPassword" type="password" placeholder="비밀번호 (6자 이상)" name="password" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input id="signupPasswordConfirm" type="password" placeholder="비밀번호 확인" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <button id="doSignup" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+          회원가입
+        </button>
+      </div>
+      <div class="flex justify-end mt-6">
+        <a href="#" id="backToLoginLink" class="text-blue-500 hover:text-blue-600 underline text-sm">로그인으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
 
-    // Firebase 앱 초기화
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+  <!-- 비밀번호 재설정 모달 -->
+  <div id="passwordResetModal" class="auth-modal">
+    <div class="auth-modal-content">
+      <span class="auth-modal-close" id="closePasswordResetModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">비밀번호 찾기</h2>
+      <div class="auth-form space-y-4">
+        <input id="resetEmail" type="email" placeholder="가입한 이메일 주소" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <button id="doPasswordReset" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+          비밀번호 재설정 이메일 발송
+        </button>
+      </div>
+      <div class="flex justify-end mt-6">
+        <a href="#" id="backToLoginFromResetLink" class="text-blue-500 hover:text-blue-600 underline text-sm">로그인으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
 
-    // DOM 요소
-    const loginButton = document.getElementById('loginButton');
-    const logoutButton = document.getElementById('logoutButton');
-    const userInfo = document.getElementById('userInfo');
-    const userPhoto = document.getElementById('userPhoto');
-    const userName = document.getElementById('userName');
-    const userEmail = document.getElementById('userEmail');
-    const pointSection = document.getElementById('pointSection');
-    const timelineSection = document.getElementById('timelineSection');
-    const loginPrompt = document.getElementById('loginPrompt');
+  <!-- 알림 메시지 -->
+  <div id="notification" class="notification">
+    <span id="notificationMessage"></span>
+  </div>
 
-    // Firestore에 사용자 프로필 저장/업데이트
-    async function saveUserProfile(user) {
-      try {
-        const userRef = doc(db, 'hanilpoint_profiles', user.uid);
-        
-        // 기존 문서 확인
-        const docSnap = await getDoc(userRef);
-        
-        if (!docSnap.exists()) {
-          // 새 사용자인 경우 문서 생성
-          await setDoc(userRef, {
-            uid: user.uid,
-            email: user.email,
-            name: user.displayName,
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp()
-          });
-          console.log('새 사용자 프로필이 생성되었습니다.');
-        } else {
-          // 기존 사용자인 경우 마지막 로그인 시간만 업데이트
-          await setDoc(userRef, {
-            lastLogin: serverTimestamp()
-          }, { merge: true });
-          console.log('사용자 로그인 시간이 업데이트되었습니다.');
-        }
-      } catch (error) {
-        console.error('사용자 프로필 저장 중 오류:', error);
-      }
-    }
+  <!-- 로딩 스피너 -->
+  <div id="loadingSpinner" class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
 
-    // UI 업데이트 함수
-    function updateUI(user) {
-      if (user) {
-        // 로그인된 상태
-        loginButton.classList.add('hidden');
-        userInfo.classList.remove('hidden');
-        pointSection.classList.remove('hidden');
-        timelineSection.classList.remove('hidden');
-        loginPrompt.classList.add('hidden');
-
-        // 사용자 정보 표시
-        userPhoto.src = user.photoURL || 'https://placehold.co/50x50';
-        userName.textContent = user.displayName || '사용자';
-        userEmail.textContent = user.email || '';
-
-        // Firestore에 사용자 프로필 저장
-        saveUserProfile(user);
-      } else {
-        // 로그아웃된 상태
-        loginButton.classList.remove('hidden');
-        userInfo.classList.add('hidden');
-        pointSection.classList.add('hidden');
-        timelineSection.classList.add('hidden');
-        loginPrompt.classList.remove('hidden');
-      }
-    }
-
-    // 구글 로그인
-    async function signInWithGoogle() {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        console.log('로그인 성공:', user);
-      } catch (error) {
-        console.error('로그인 실패:', error);
-        alert('로그인에 실패했습니다. 다시 시도해주세요.');
-      }
-    }
-
-    // 로그아웃
-    async function signOutUser() {
-      try {
-        await signOut(auth);
-        console.log('로그아웃 성공');
-      } catch (error) {
-        console.error('로그아웃 실패:', error);
-      }
-    }
-
-    // 인증 상태 변화 감지
-    onAuthStateChanged(auth, (user) => {
-      updateUI(user);
-    });
-
-    // 이벤트 리스너
-    loginButton.addEventListener('click', signInWithGoogle);
-    logoutButton.addEventListener('click', signOutUser);
-
-    // 초기 UI 설정
-    updateUI(null);
-  </script>
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>
