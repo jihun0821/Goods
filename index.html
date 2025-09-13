@@ -7,11 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://js.tosspayments.com/v2/standard"></script>
   
-  <!-- Firebase SDK -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  
   <style>
     /* Custom animations and gradients */
     @keyframes modalSlideIn {
@@ -185,7 +180,7 @@
         <input id="signupPassword" type="password" placeholder="비밀번호 (6자 이상)" name="password" 
                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
         <input id="signupPasswordConfirm" type="password" placeholder="비밀번호 확인" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none force:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
         <button id="doSignup" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
           회원가입
         </button>
@@ -224,7 +219,7 @@
     <div class="absolute left-1/2 top-1/2 w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full spinner-animation"></div>
   </div>
 
-  <!-- JavaScript 파일들 -->
+  <!-- JavaScript 파일들 - 로딩 순서 중요! -->
   <script type="module" src="js/firebase-config.js"></script>
   <script type="module" src="js/auth.js"></script>
   <script type="module" src="js/ui.js"></script>
