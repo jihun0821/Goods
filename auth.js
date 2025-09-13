@@ -121,39 +121,63 @@ function isValidHanilEmail(email) {
   return email.endsWith('@hanilgo.cnehs.kr');
 }
 
-// 사용자 데이터를 Firestore에 저장
 async function createUserProfile(user, additionalData = {}) {
   try {
+    console.log('=== 프로필 생성 시작 ===');
+    console.log('사용자 UID:', user.uid);
+    console.log('사용자 이메일:', user.email);
+    console.log('Firestore 인스턴스:', !!window.firebaseDb);
+    console.log('현재 인증 상태:', !!window.firebaseAuth.currentUser);
+    
     if (!window.firebaseDb) {
       throw new Error('Firestore not initialized');
     }
     
+    // 인증 토큰 확인
+    const token = await user.getIdToken();
+    console.log('인증 토큰 존재:', !!token);
+    
     const userRef = doc(window.firebaseDb, 'users', user.uid);
+    console.log('문서 참조 생성:', userRef.id);
+    
+    // 먼저 문서가 존재하는지 확인
+    console.log('기존 문서 확인 중...');
     const userSnapshot = await getDoc(userRef);
+    console.log('문서 존재 여부:', userSnapshot.exists());
     
     if (!userSnapshot.exists()) {
       const { displayName, email, uid } = user;
-      const createdAt = serverTimestamp();
-      
-      await setDoc(userRef, {
+      const userData = {
         uid,
         displayName: displayName || email.split('@')[0],
         email,
         points: 0,
-        createdAt,
-        ...additionalData
-      });
+        createdAt: serverTimestamp()
+      };
       
-      console.log('User profile created in hanilpoint database');
+      console.log('새 문서 생성 데이터:', userData);
+      await setDoc(userRef, userData);
+      console.log('✅ 사용자 프로필 생성 완료');
+    } else {
+      console.log('✅ 기존 프로필 존재');
     }
     
     return userRef;
   } catch (error) {
-    console.error('Error creating user profile:', error);
+    console.error('=== 프로필 생성 오류 ===');
+    console.error('오류 타입:', error.constructor.name);
+    console.error('오류 코드:', error.code);
+    console.error('오류 메시지:', error.message);
+    console.error('전체 오류:', error);
+    
+    // 네트워크 오류나 권한 오류 상세 로그
+    if (error.code === 'permission-denied') {
+      console.error('권한 거부: Firestore 규칙을 확인하세요');
+    }
+    
     throw error;
   }
 }
-
 // 사용자 포인트 조회
 async function getUserPoints(userId) {
   try {
@@ -210,7 +234,7 @@ async function updateUserUI(user) {
   }
 }
 
-// 로그인 함수
+// 로그인 함수 수정
 async function login(email, password) {
   try {
     showLoading(true);
@@ -223,8 +247,19 @@ async function login(email, password) {
       throw new Error('Firebase Auth not initialized');
     }
     
+    console.log('시작 로그인:', email);
     const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
-    await createUserProfile(userCredential.user);
+    console.log('Firebase 인증 성공:', userCredential.user.uid);
+    
+    // Firestore 작업을 별도로 처리하여 로그인 성공과 분리
+    try {
+      await createUserProfile(userCredential.user);
+      console.log('사용자 프로필 생성 성공');
+    } catch (profileError) {
+      // 프로필 생성 실패해도 로그인은 성공한 상태
+      console.error('프로필 생성 실패 (로그인은 성공):', profileError);
+      showNotification('로그인은 성공했지만 프로필 저장에 문제가 있습니다.', 'info');
+    }
     
     hideAllModals();
     showNotification('로그인되었습니다.', 'success');
@@ -232,21 +267,26 @@ async function login(email, password) {
     console.error('Login error:', error);
     let errorMessage = '로그인에 실패했습니다.';
     
-    switch (error.code) {
-      case 'auth/user-not-found':
-        errorMessage = '등록되지 않은 이메일입니다.';
-        break;
-      case 'auth/wrong-password':
-        errorMessage = '비밀번호가 올바르지 않습니다.';
-        break;
-      case 'auth/invalid-email':
-        errorMessage = '올바른 이메일 형식이 아닙니다.';
-        break;
-      case 'auth/too-many-requests':
-        errorMessage = '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
-        break;
-      default:
-        errorMessage = error.message;
+    // Firebase Auth 에러만 처리
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = '등록되지 않은 이메일입니다.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = '비밀번호가 올바르지 않습니다.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = '올바른 이메일 형식이 아닙니다.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
+          break;
+        default:
+          errorMessage = error.message;
+      }
+    } else {
+      errorMessage = error.message;
     }
     
     showNotification(errorMessage, 'error');
