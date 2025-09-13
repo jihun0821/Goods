@@ -19,13 +19,16 @@ console.log('Firebase 설정:', firebaseConfig);
 const app = initializeApp(firebaseConfig);
 console.log('Firebase 앱 초기화 완료');
 
-// hanilpoint 데이터베이스 사용을 위한 설정
+// Auth 초기화
 const auth = getAuth(app);
 console.log('Firebase Auth 초기화 완료');
 
-// 특정 데이터베이스 ID를 사용하는 경우 (hanilpoint)
-// 기본 데이터베이스가 아닌 경우에만 사용
-const db = getFirestore(app);
+// hanilpoint 데이터베이스 명시적 지정
+// 만약 hanilpoint가 기본 데이터베이스가 아니라면:
+const db = getFirestore(app, 'hanilpoint');
+// 기본 데이터베이스를 사용한다면:
+// const db = getFirestore(app);
+
 console.log('Firestore 초기화 완료');
 
 // 디버깅용 정보 출력
@@ -39,3 +42,17 @@ window.firebaseApp = app;
 
 console.log('Firebase 전역 변수 설정 완료');
 console.log('Firebase initialized with project:', app.options.projectId);
+
+// Firestore 연결 테스트
+setTimeout(async () => {
+  try {
+    console.log('=== Firestore 연결 테스트 ===');
+    console.log('데이터베이스 인스턴스:', db.app.name);
+    if (db._delegate && db._delegate._databaseId) {
+      console.log('Project ID:', db._delegate._databaseId.projectId);
+      console.log('Database ID:', db._delegate._databaseId.database);
+    }
+  } catch (error) {
+    console.error('Firestore 정보 조회 오류:', error);
+  }
+}, 1000);
