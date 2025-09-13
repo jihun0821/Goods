@@ -15,62 +15,96 @@ import {
   serverTimestamp 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// DOM 요소 가져오기
-const loginModal = document.getElementById('loginModal');
-const signupModal = document.getElementById('signupModal');
-const passwordResetModal = document.getElementById('passwordResetModal');
-const authButton = document.getElementById('authButton');
-const authButtonText = document.getElementById('authButtonText');
-const userPoints = document.getElementById('userPoints');
-const notification = document.getElementById('notification');
-const notificationMessage = document.getElementById('notificationMessage');
-const loadingSpinner = document.getElementById('loadingSpinner');
-
 let currentUser = null;
 
-// UI 업데이트 함수 (외부에서 참조 가능하도록)
-let updateUserUI;
+// UI 요소들 (한 곳에서만 관리)
+let loginModal, signupModal, passwordResetModal, authButton, authButtonText, userPoints, notification, notificationMessage, loadingSpinner;
 
-// 알림 함수 (외부에서 참조 가능하도록)
-let showNotification;
-
-// 로딩 함수 (외부에서 참조 가능하도록) 
-let showLoading;
+// DOM이 로드된 후 요소들 가져오기
+function initializeElements() {
+  loginModal = document.getElementById('loginModal');
+  signupModal = document.getElementById('signupModal');
+  passwordResetModal = document.getElementById('passwordResetModal');
+  authButton = document.getElementById('authButton');
+  authButtonText = document.getElementById('authButtonText');
+  userPoints = document.getElementById('userPoints');
+  notification = document.getElementById('notification');
+  notificationMessage = document.getElementById('notificationMessage');
+  loadingSpinner = document.getElementById('loadingSpinner');
+}
 
 // 알림 메시지 표시 함수
-showNotification = function(message, type = 'info') {
-  if (notificationMessage && notification) {
-    notificationMessage.textContent = message;
-    notification.className = `notification ${type}`;
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-      notification.classList.remove('show');
-    }, 5000);
-  } else {
-    // DOM 요소가 없을 경우 콘솔에 출력
-    console.log(`${type.toUpperCase()}: ${message}`);
+function showNotification(message, type = 'info') {
+  console.log(`${type.toUpperCase()}: ${message}`);
+  
+  if (!notification || !notificationMessage) {
+    return;
   }
+  
+  notificationMessage.textContent = message;
+  
+  // 기존 클래스 제거
+  notification.className = '';
+  
+  // 기본 클래스 추가
+  notification.className = 'fixed top-5 right-5 z-[2000] p-4 rounded-lg font-medium shadow-lg min-w-[200px] transform transition-transform duration-300 ease-out max-md:right-3 max-md:left-3 max-md:transform max-md:translate-x-0 max-md:transition-transform max-md:duration-300 max-md:ease-out';
+  
+  // 타입별 색상 적용
+  if (type === 'success') {
+    notification.classList.add('bg-emerald-500', 'text-white');
+  } else if (type === 'error') {
+    notification.classList.add('bg-red-500', 'text-white');
+  } else {
+    notification.classList.add('bg-blue-500', 'text-white');
+  }
+  
+  // 애니메이션
+  const isMobile = window.innerWidth < 768;
+  if (isMobile) {
+    notification.classList.remove('-translate-y-[100px]');
+    notification.classList.add('translate-y-0');
+  } else {
+    notification.classList.remove('translate-x-[400px]');
+    notification.classList.add('translate-x-0');
+  }
+  
+  setTimeout(() => {
+    if (isMobile) {
+      notification.classList.remove('translate-y-0');
+      notification.classList.add('-translate-y-[100px]');
+    } else {
+      notification.classList.remove('translate-x-0');
+      notification.classList.add('translate-x-[400px]');
+    }
+  }, 5000);
 }
 
 // 로딩 스피너 표시/숨김
-showLoading = function(show = true) {
-  if (loadingSpinner) {
-    loadingSpinner.style.display = show ? 'block' : 'none';
+function showLoading(show = true) {
+  if (!loadingSpinner) return;
+  
+  if (show) {
+    loadingSpinner.classList.remove('hidden');
+    loadingSpinner.classList.add('block');
+  } else {
+    loadingSpinner.classList.add('hidden');
+    loadingSpinner.classList.remove('block');
   }
 }
 
 // 모달 표시/숨김 함수
 function showModal(modal) {
   if (modal) {
-    modal.style.display = 'block';
+    modal.classList.remove('hidden');
+    modal.classList.add('block');
     document.body.style.overflow = 'hidden';
   }
 }
 
 function hideModal(modal) {
   if (modal) {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    modal.classList.remove('block');
     document.body.style.overflow = 'auto';
   }
 }
@@ -90,6 +124,10 @@ function isValidHanilEmail(email) {
 // 사용자 데이터를 Firestore에 저장
 async function createUserProfile(user, additionalData = {}) {
   try {
+    if (!window.firebaseDb) {
+      throw new Error('Firestore not initialized');
+    }
+    
     const userRef = doc(window.firebaseDb, 'users', user.uid);
     const userSnapshot = await getDoc(userRef);
     
@@ -119,6 +157,10 @@ async function createUserProfile(user, additionalData = {}) {
 // 사용자 포인트 조회
 async function getUserPoints(userId) {
   try {
+    if (!window.firebaseDb) {
+      return 0;
+    }
+    
     const userRef = doc(window.firebaseDb, 'users', userId);
     const userSnapshot = await getDoc(userRef);
     
@@ -133,11 +175,13 @@ async function getUserPoints(userId) {
 }
 
 // UI 업데이트
-updateUserUI = async function(user) {
+async function updateUserUI(user) {
+  currentUser = user;
+  
   if (user) {
-    currentUser = user;
     if (authButtonText) {
-      authButtonText.textContent = user.displayName || user.email.split('@')[0];
+      const displayName = user.displayName || user.email.split('@')[0];
+      authButtonText.textContent = displayName.length > 10 ? displayName.substring(0, 10) + '...' : displayName;
     }
     if (authButton) {
       authButton.classList.add('user-info-button');
@@ -145,11 +189,15 @@ updateUserUI = async function(user) {
     
     // 포인트 가져오기
     if (userPoints) {
-      const points = await getUserPoints(user.uid);
-      userPoints.textContent = points.toLocaleString();
+      try {
+        const points = await getUserPoints(user.uid);
+        userPoints.textContent = points.toLocaleString();
+      } catch (error) {
+        console.error('Error loading user points:', error);
+        userPoints.textContent = '0';
+      }
     }
   } else {
-    currentUser = null;
     if (authButtonText) {
       authButtonText.textContent = 'LOGIN';
     }
@@ -171,15 +219,14 @@ async function login(email, password) {
       throw new Error('한일고등학교 이메일(@hanilgo.cnehs.kr)만 사용 가능합니다.');
     }
     
+    if (!window.firebaseAuth) {
+      throw new Error('Firebase Auth not initialized');
+    }
+    
     const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
     await createUserProfile(userCredential.user);
     
-    // 모달 닫기 함수 호출 (ui.js에서 정의되었을 수도 있음)
-    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
-      window.uiFunctions.hideAllModals();
-    } else {
-      hideAllModals();
-    }
+    hideAllModals();
     showNotification('로그인되었습니다.', 'success');
   } catch (error) {
     console.error('Login error:', error);
@@ -225,15 +272,14 @@ async function signup(email, password, passwordConfirm) {
       throw new Error('비밀번호가 일치하지 않습니다.');
     }
     
+    if (!window.firebaseAuth) {
+      throw new Error('Firebase Auth not initialized');
+    }
+    
     const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
     await createUserProfile(userCredential.user);
     
-    // 모달 닫기 함수 호출 (ui.js에서 정의되었을 수도 있음)
-    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
-      window.uiFunctions.hideAllModals();
-    } else {
-      hideAllModals();
-    }
+    hideAllModals();
     showNotification('회원가입이 완료되었습니다.', 'success');
   } catch (error) {
     console.error('Signup error:', error);
@@ -268,14 +314,13 @@ async function resetPassword(email) {
       throw new Error('한일고등학교 이메일(@hanilgo.cnehs.kr)만 사용 가능합니다.');
     }
     
+    if (!window.firebaseAuth) {
+      throw new Error('Firebase Auth not initialized');
+    }
+    
     await sendPasswordResetEmail(window.firebaseAuth, email);
     
-    // 모달 닫기 함수 호출 (ui.js에서 정의되었을 수도 있음)
-    if (window.uiFunctions && window.uiFunctions.hideAllModals) {
-      window.uiFunctions.hideAllModals();
-    } else {
-      hideAllModals();
-    }
+    hideAllModals();
     showNotification('비밀번호 재설정 이메일이 발송되었습니다.', 'success');
   } catch (error) {
     console.error('Password reset error:', error);
@@ -302,6 +347,11 @@ async function resetPassword(email) {
 async function logout() {
   try {
     showLoading(true);
+    
+    if (!window.firebaseAuth) {
+      throw new Error('Firebase Auth not initialized');
+    }
+    
     await signOut(window.firebaseAuth);
     showNotification('로그아웃되었습니다.', 'success');
   } catch (error) {
@@ -312,34 +362,14 @@ async function logout() {
   }
 }
 
-// 사용자 인증 상태 변경 리스너
-onAuthStateChanged(window.firebaseAuth, async (user) => {
-  currentUser = user;
-  
-  if (user) {
-    // 사용자가 로그인된 상태
-    console.log('User logged in:', user.email);
-    
-    // UI 업데이트 함수가 로드되었을 때 호출
-    if (updateUserUI) {
-      updateUserUI(user);
-    } else {
-      // UI 함수가 아직 로드되지 않았다면 잠시 후 다시 시도
-      setTimeout(() => {
-        if (updateUserUI) updateUserUI(user);
-      }, 100);
-    }
-  } else {
-    // 사용자가 로그아웃된 상태
-    console.log('User logged out');
-    if (updateUserUI) {
-      updateUserUI(null);
-    }
-  }
-});
+// 폼 입력 필드 초기화
+function clearForm(formId) {
+  const inputs = document.querySelectorAll(`#${formId} input`);
+  inputs.forEach(input => input.value = '');
+}
 
 // 이벤트 리스너 설정
-document.addEventListener('DOMContentLoaded', () => {
+function setupEventListeners() {
   // 인증 버튼 클릭
   authButton?.addEventListener('click', () => {
     if (currentUser) {
@@ -356,8 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 로그인 모달 이벤트
   document.getElementById('closeLoginModal')?.addEventListener('click', () => hideModal(loginModal));
   document.getElementById('doLogin')?.addEventListener('click', () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value;
     
     if (!email || !password) {
       showNotification('이메일과 비밀번호를 입력해주세요.', 'error');
@@ -383,9 +413,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('closeSignupModal')?.addEventListener('click', () => hideModal(signupModal));
   document.getElementById('doSignup')?.addEventListener('click', () => {
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+    const email = document.getElementById('signupEmail')?.value.trim();
+    const password = document.getElementById('signupPassword')?.value;
+    const passwordConfirm = document.getElementById('signupPasswordConfirm')?.value;
     
     if (!email || !password || !passwordConfirm) {
       showNotification('모든 필드를 입력해주세요.', 'error');
@@ -410,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('closePasswordResetModal')?.addEventListener('click', () => hideModal(passwordResetModal));
   document.getElementById('doPasswordReset')?.addEventListener('click', () => {
-    const email = document.getElementById('resetEmail').value.trim();
+    const email = document.getElementById('resetEmail')?.value.trim();
     
     if (!email) {
       showNotification('이메일을 입력해주세요.', 'error');
@@ -433,19 +463,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === passwordResetModal) hideModal(passwordResetModal);
   });
 
-  // 폼 입력 필드 초기화
-  const clearForm = (formId) => {
-    const inputs = document.querySelectorAll(`#${formId} input`);
-    inputs.forEach(input => input.value = '');
-  };
-
   // 모달이 열릴 때 폼 초기화
   if (loginModal && signupModal && passwordResetModal) {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
           const target = mutation.target;
-          if (target.style.display === 'block') {
+          if (!target.classList.contains('hidden')) {
             if (target.id === 'loginModal') clearForm('loginModal');
             if (target.id === 'signupModal') clearForm('signupModal');
             if (target.id === 'passwordResetModal') clearForm('passwordResetModal');
@@ -458,9 +482,54 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(signupModal, { attributes: true });
     observer.observe(passwordResetModal, { attributes: true });
   }
-});
+}
 
-// 전역 함수로 내보내기 (다른 스크립트에서 사용할 수 있도록)
+// Firebase 인증 상태 리스너 설정
+function setupAuthStateListener() {
+  if (!window.firebaseAuth) {
+    console.error('Firebase Auth not initialized');
+    return;
+  }
+  
+  onAuthStateChanged(window.firebaseAuth, async (user) => {
+    console.log('Auth state changed:', user ? user.email : 'logged out');
+    currentUser = user;
+    await updateUserUI(user);
+  });
+}
+
+// 초기화 함수
+function initialize() {
+  console.log('Initializing auth.js...');
+  
+  // DOM 요소 초기화
+  initializeElements();
+  
+  // 이벤트 리스너 설정
+  setupEventListeners();
+  
+  // Firebase가 준비되면 인증 상태 리스너 설정
+  const checkFirebaseReady = () => {
+    if (window.firebaseAuth && window.firebaseDb) {
+      console.log('Firebase is ready, setting up auth state listener');
+      setupAuthStateListener();
+    } else {
+      console.log('Waiting for Firebase to be ready...');
+      setTimeout(checkFirebaseReady, 100);
+    }
+  };
+  
+  checkFirebaseReady();
+}
+
+// DOM이 로드된 후 초기화
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}
+
+// 전역 함수로 내보내기
 window.authFunctions = {
   login,
   signup,
@@ -472,12 +541,4 @@ window.authFunctions = {
   updateUserUI,
   showLoading,
   hideAllModals
-};
-
-// UI 함수들을 전역에서도 접근 가능하도록 설정
-window.uiFunctions = {
-  hideAllModals,
-  showNotification,
-  showLoading,
-  updateUserUI
 };
