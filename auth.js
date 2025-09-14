@@ -289,7 +289,7 @@ async function updateUserUI(user) {
             <div class="text-xs font-semibold text-black truncate">${userEmail}</div>
           </div>
         </div>
-        <img class="w-3.5 h-3.5 flex-shrink-0" src="/HanilPoint/images/underarrow.png" alt="dropdown icon" />
+        <img class="w-3.5 h-3.5 flex-shrink-0" src="/-/images/underarrow.png" alt="dropdown icon" />
       `;
       
       // 스타일 변경
