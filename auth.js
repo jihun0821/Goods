@@ -201,6 +201,27 @@ async function createUserProfile(user, additionalData = {}) {
   }
 }
 
+// hanilpoint 데이터베이스에서 사용자 프로필 정보 가져오기
+async function getUserProfile(userId) {
+  try {
+    if (!window.firebaseDb) {
+      console.error('Firestore not initialized');
+      return null;
+    }
+    
+    const userRef = doc(window.firebaseDb, 'hanilpoint', userId);
+    const userSnapshot = await getDoc(userRef);
+    
+    if (userSnapshot.exists()) {
+      return userSnapshot.data();
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting user profile from hanilpoint:', error);
+    return null;
+  }
+}
+
 // 사용자 포인트 조회 - hanilpoint 컬렉션에서 조회
 async function getUserPoints(userId) {
   try {
@@ -222,14 +243,41 @@ async function getUserPoints(userId) {
   }
 }
 
-// UI 업데이트
+// UI 업데이트 - hanilpoint 데이터베이스에서 사용자 정보 가져오기
 async function updateUserUI(user) {
   currentUser = user;
   
   if (user) {
-    // 로그인된 상태 - User Box로 변경
-    const displayName = user.displayName || user.email.split('@')[0];
-    const userEmail = user.email;
+    // hanilpoint 데이터베이스에서 사용자 프로필 가져오기
+    let userProfile = null;
+    let displayName = user.email.split('@')[0]; // 기본값
+    let userEmail = user.email;
+    let points = 0;
+    
+    try {
+      userProfile = await getUserProfile(user.uid);
+      if (userProfile) {
+        displayName = userProfile.displayName || displayName;
+        points = userProfile.points || 0;
+        console.log('hanilpoint에서 가져온 사용자 프로필:', userProfile);
+      } else {
+        console.log('hanilpoint에 프로필이 없음, 기본값 사용');
+        // 프로필이 없으면 생성 시도
+        try {
+          await createUserProfile(user);
+          // 다시 프로필 가져오기
+          userProfile = await getUserProfile(user.uid);
+          if (userProfile) {
+            displayName = userProfile.displayName || displayName;
+            points = userProfile.points || 0;
+          }
+        } catch (createError) {
+          console.error('프로필 생성 실패:', createError);
+        }
+      }
+    } catch (error) {
+      console.error('사용자 프로필 가져오기 실패:', error);
+    }
     
     if (authButton) {
       // User Box HTML 구조로 변경
@@ -248,15 +296,9 @@ async function updateUserUI(user) {
       authButton.className = "w-full md:w-72 h-16 bg-zinc-100 rounded-3xl backdrop-blur-[2px] relative flex items-center px-4 flex-shrink-0 cursor-pointer hover:bg-zinc-200 transition-all duration-300";
     }
     
-    // hanilpoint에서 포인트 가져오기
+    // hanilpoint에서 가져온 포인트 표시
     if (userPoints) {
-      try {
-        const points = await getUserPoints(user.uid);
-        userPoints.textContent = points.toLocaleString();
-      } catch (error) {
-        console.error('Error loading user points from hanilpoint:', error);
-        userPoints.textContent = '0';
-      }
+      userPoints.textContent = points.toLocaleString();
     }
   } else {
     // 로그아웃 상태 - 로그인 버튼으로 복원
@@ -625,6 +667,7 @@ window.authFunctions = {
   resetPassword,
   getCurrentUser: () => currentUser,
   getUserPoints,
+  getUserProfile,
   showNotification,
   updateUserUI,
   showLoading,
