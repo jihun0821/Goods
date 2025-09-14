@@ -121,6 +121,18 @@ function isValidHanilEmail(email) {
   return email.endsWith('@hanilgo.cnehs.kr');
 }
 
+// 사용자 프로필에 displayName 설정을 위한 함수
+async function updateDisplayName(user, name) {
+  try {
+    await updateProfile(user, {
+      displayName: name
+    });
+    console.log('Display name updated successfully');
+  } catch (error) {
+    console.error('Error updating display name:', error);
+  }
+}
+
 async function createUserProfile(user, additionalData = {}) {
   try {
     console.log('=== 프로필 생성 시작 ===');
@@ -146,14 +158,26 @@ async function createUserProfile(user, additionalData = {}) {
     const userSnapshot = await getDoc(userRef);
     console.log('hanilpoint 프로필 존재 여부:', userSnapshot.exists());
     
-    // 기존 프로필이 있더라도 새로 생성 (덮어쓰기)
     const { displayName, email, uid } = user;
+    let finalDisplayName = displayName;
+    
+    // displayName이 없으면 이메일에서 추출하여 설정
+    if (!displayName) {
+      const emailPrefix = email.split('@')[0];
+      finalDisplayName = emailPrefix;
+      
+      // Firebase Auth 프로필에도 displayName 설정
+      await updateDisplayName(user, finalDisplayName);
+    }
+    
+    // 기존 프로필이 있더라도 새로 생성 (덮어쓰기)
     const userData = {
       uid,
-      displayName: displayName || email.split('@')[0],
+      displayName: finalDisplayName,
       email,
-      points: 0,
-      createdAt: serverTimestamp()
+      points: userSnapshot.exists() ? (userSnapshot.data().points || 0) : 0, // 기존 포인트 보존
+      createdAt: userSnapshot.exists() ? userSnapshot.data().createdAt : serverTimestamp(),
+      updatedAt: serverTimestamp()
     };
     
     console.log('hanilpoint에 프로필 생성/업데이트 데이터:', userData);
@@ -203,12 +227,25 @@ async function updateUserUI(user) {
   currentUser = user;
   
   if (user) {
-    if (authButtonText) {
-      const displayName = user.displayName || user.email.split('@')[0];
-      authButtonText.textContent = displayName.length > 10 ? displayName.substring(0, 10) + '...' : displayName;
-    }
+    // 로그인된 상태 - User Box로 변경
+    const displayName = user.displayName || user.email.split('@')[0];
+    const userEmail = user.email;
+    
     if (authButton) {
-      authButton.classList.add('user-info-button');
+      // User Box HTML 구조로 변경
+      authButton.innerHTML = `
+        <div class="flex items-center gap-3 w-full">
+          <img class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center" src="https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=48&rounded=true" alt="user avatar" />
+          <div class="flex flex-col flex-1 min-w-0">
+            <div class="text-base font-semibold text-black truncate">${displayName}</div>
+            <div class="text-xs font-semibold text-black truncate">${userEmail}</div>
+          </div>
+        </div>
+        <img class="w-3.5 h-3.5 flex-shrink-0" src="/HanilPoint/images/underarrow.png" alt="dropdown icon" />
+      `;
+      
+      // 스타일 변경
+      authButton.className = "w-full md:w-72 h-16 bg-zinc-100 rounded-3xl backdrop-blur-[2px] relative flex items-center px-4 flex-shrink-0 cursor-pointer hover:bg-zinc-200 transition-all duration-300";
     }
     
     // hanilpoint에서 포인트 가져오기
@@ -222,12 +259,23 @@ async function updateUserUI(user) {
       }
     }
   } else {
-    if (authButtonText) {
-      authButtonText.textContent = 'LOGIN';
-    }
+    // 로그아웃 상태 - 로그인 버튼으로 복원
     if (authButton) {
-      authButton.classList.remove('user-info-button');
+      authButton.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-zinc-300/90 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4m-5-4l4-4m0 0l-4-4m4 4H3"></path>
+            </svg>
+          </div>
+          <span id="authButtonText" class="text-black font-semibold text-lg">LOGIN</span>
+        </div>
+      `;
+      
+      // 스타일 복원
+      authButton.className = "w-full md:w-72 h-16 bg-white border-2 border-[#C5D4F2] rounded-3xl flex items-center justify-center px-4 flex-shrink-0 cursor-pointer hover:shadow-lg transition-all duration-300";
     }
+    
     if (userPoints) {
       userPoints.textContent = '0';
     }
