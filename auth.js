@@ -137,30 +137,28 @@ async function createUserProfile(user, additionalData = {}) {
     const token = await user.getIdToken();
     console.log('인증 토큰 존재:', !!token);
     
-    const userRef = doc(window.firebaseDb, 'users', user.uid);
-    console.log('문서 참조 생성:', userRef.id);
+    // hanilpoint 컬렉션에서 사용자 프로필 참조
+    const userRef = doc(window.firebaseDb, 'hanilpoint', user.uid);
+    console.log('문서 참조 생성 (hanilpoint):', userRef.id);
     
-    // 먼저 문서가 존재하는지 확인
-    console.log('기존 문서 확인 중...');
+    // hanilpoint 컬렉션에서 기존 프로필 확인
+    console.log('hanilpoint 컬렉션에서 기존 프로필 확인 중...');
     const userSnapshot = await getDoc(userRef);
-    console.log('문서 존재 여부:', userSnapshot.exists());
+    console.log('hanilpoint 프로필 존재 여부:', userSnapshot.exists());
     
-    if (!userSnapshot.exists()) {
-      const { displayName, email, uid } = user;
-      const userData = {
-        uid,
-        displayName: displayName || email.split('@')[0],
-        email,
-        points: 0,
-        createdAt: serverTimestamp()
-      };
-      
-      console.log('새 문서 생성 데이터:', userData);
-      await setDoc(userRef, userData);
-      console.log('✅ 사용자 프로필 생성 완료');
-    } else {
-      console.log('✅ 기존 프로필 존재');
-    }
+    // 기존 프로필이 있더라도 새로 생성 (덮어쓰기)
+    const { displayName, email, uid } = user;
+    const userData = {
+      uid,
+      displayName: displayName || email.split('@')[0],
+      email,
+      points: 0,
+      createdAt: serverTimestamp()
+    };
+    
+    console.log('hanilpoint에 프로필 생성/업데이트 데이터:', userData);
+    await setDoc(userRef, userData);
+    console.log('✅ hanilpoint에 사용자 프로필 생성/업데이트 완료');
     
     return userRef;
   } catch (error) {
@@ -178,14 +176,16 @@ async function createUserProfile(user, additionalData = {}) {
     throw error;
   }
 }
-// 사용자 포인트 조회
+
+// 사용자 포인트 조회 - hanilpoint 컬렉션에서 조회
 async function getUserPoints(userId) {
   try {
     if (!window.firebaseDb) {
       return 0;
     }
     
-    const userRef = doc(window.firebaseDb, 'users', userId);
+    // hanilpoint 컬렉션에서 포인트 조회
+    const userRef = doc(window.firebaseDb, 'hanilpoint', userId);
     const userSnapshot = await getDoc(userRef);
     
     if (userSnapshot.exists()) {
@@ -193,7 +193,7 @@ async function getUserPoints(userId) {
     }
     return 0;
   } catch (error) {
-    console.error('Error getting user points:', error);
+    console.error('Error getting user points from hanilpoint:', error);
     return 0;
   }
 }
@@ -211,13 +211,13 @@ async function updateUserUI(user) {
       authButton.classList.add('user-info-button');
     }
     
-    // 포인트 가져오기
+    // hanilpoint에서 포인트 가져오기
     if (userPoints) {
       try {
         const points = await getUserPoints(user.uid);
         userPoints.textContent = points.toLocaleString();
       } catch (error) {
-        console.error('Error loading user points:', error);
+        console.error('Error loading user points from hanilpoint:', error);
         userPoints.textContent = '0';
       }
     }
@@ -251,13 +251,13 @@ async function login(email, password) {
     const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
     console.log('Firebase 인증 성공:', userCredential.user.uid);
     
-    // Firestore 작업을 별도로 처리하여 로그인 성공과 분리
+    // hanilpoint 컬렉션에 프로필 생성/업데이트를 별도로 처리
     try {
       await createUserProfile(userCredential.user);
-      console.log('사용자 프로필 생성 성공');
+      console.log('hanilpoint에 사용자 프로필 생성/업데이트 성공');
     } catch (profileError) {
       // 프로필 생성 실패해도 로그인은 성공한 상태
-      console.error('프로필 생성 실패 (로그인은 성공):', profileError);
+      console.error('hanilpoint 프로필 생성/업데이트 실패 (로그인은 성공):', profileError);
       showNotification('로그인은 성공했지만 프로필 저장에 문제가 있습니다.', 'info');
     }
     
