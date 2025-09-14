@@ -84,29 +84,111 @@ setTimeout(async () => {
   }
 }, 1000);
 
-// 연결 테스트용 함수
+// 연결 테스트용 함수 - 더 정확한 데이터베이스 정보 확인
 window.testFirestoreConnection = async () => {
   try {
     const { doc, getDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
     
+    // 현재 연결된 데이터베이스 정보 정확히 파악
+    let currentDbName = 'unknown';
+    try {
+      if (db._delegate && db._delegate._databaseId) {
+        currentDbName = db._delegate._databaseId.database;
+      }
+    } catch (e) {
+      console.warn('데이터베이스 이름 추출 실패:', e);
+    }
+    
+    console.log('현재 연결된 데이터베이스:', currentDbName);
+    
     // 테스트 문서 생성
     const testDoc = doc(db, 'connection_test', 'test_' + Date.now());
-    await setDoc(testDoc, {
-      message: 'hanilpoint 데이터베이스 연결 테스트',
+    const testData = {
+      message: 'Firebase 데이터베이스 연결 테스트',
       timestamp: serverTimestamp(),
-      database: db._delegate?._databaseId?.database || 'unknown'
-    });
+      database: currentDbName,
+      targetDatabase: 'hanilpoint',
+      success: currentDbName === 'hanilpoint'
+    };
+    
+    await setDoc(testDoc, testData);
     
     // 문서 읽기
     const snapshot = await getDoc(testDoc);
     if (snapshot.exists()) {
-      console.log('✅ 연결 테스트 성공! 데이터:', snapshot.data());
-      return true;
+      const data = snapshot.data();
+      console.log('✅ 연결 테스트 성공!');
+      console.log('저장된 데이터:', data);
+      
+      if (data.success) {
+        console.log('🎉 hanilpoint 데이터베이스에 성공적으로 연결됨!');
+      } else {
+        console.log('⚠️ 다른 데이터베이스에 연결됨:', data.database);
+        console.log('해결책을 제안합니다...');
+      }
+      
+      return data;
     }
   } catch (error) {
     console.error('❌ 연결 테스트 실패:', error);
+    
+    // 오류 유형별 안내
+    if (error.code === 'permission-denied') {
+      console.log('💡 해결책: Firestore 보안 규칙을 확인하세요');
+    } else if (error.code === 'not-found') {
+      console.log('💡 해결책: 데이터베이스나 컬렉션이 존재하지 않습니다');
+    } else {
+      console.log('💡 일반적인 해결책:');
+      console.log('1. Firebase Console에서 hanilpoint 데이터베이스 존재 확인');
+      console.log('2. 보안 규칙 확인');
+      console.log('3. 네트워크 연결 확인');
+    }
+    
     return false;
   }
+};
+
+// 추가: 모든 가능한 데이터베이스 이름으로 연결 시도
+window.tryAllDatabases = async () => {
+  const possibleNames = [
+    '(default)',
+    'default', 
+    'hanilpoint',
+    'hsp-auth-22845',
+    'firestore'
+  ];
+  
+  console.log('=== 모든 가능한 데이터베이스 연결 시도 ===');
+  
+  for (const dbName of possibleNames) {
+    try {
+      console.log(`\n${dbName} 시도 중...`);
+      const testDb = getFirestore(app, dbName);
+      
+      // 실제 연결된 데이터베이스 이름 확인
+      let actualName = 'unknown';
+      if (testDb._delegate && testDb._delegate._databaseId) {
+        actualName = testDb._delegate._databaseId.database;
+      }
+      
+      console.log(`✅ ${dbName} -> 실제 연결: ${actualName}`);
+      
+      if (actualName === 'hanilpoint') {
+        console.log('🎯 hanilpoint 데이터베이스 발견! 이 설정을 사용하세요:');
+        console.log(`db = getFirestore(app, '${dbName}');`);
+        
+        // 전역 db 변수 업데이트
+        window.firebaseDb = testDb;
+        return testDb;
+      }
+      
+    } catch (error) {
+      console.log(`❌ ${dbName} 실패:`, error.message);
+    }
+  }
+  
+  console.log('⚠️ hanilpoint 데이터베이스를 찾지 못했습니다');
+  return null;
 };
 
 console.log('연결 테스트 함수 등록 완료. window.testFirestoreConnection() 으로 테스트 가능');
