@@ -283,7 +283,7 @@ async function updateUserUI(user) {
       // User Box HTML 구조로 변경
       authButton.innerHTML = `
         <div class="flex items-center gap-3 w-full">
-          <img class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center" src="https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=667eea&color=fff&size=48&rounded=true" alt="user avatar" />
+          <img class="w-12 h-12 rounded-full" src="https://placehold.co/50x50" alt="user" />
           <div class="flex flex-col flex-1 min-w-0">
             <div class="text-base font-semibold text-black truncate">${displayName}</div>
             <div class="text-xs font-semibold text-black truncate">${userEmail}</div>
