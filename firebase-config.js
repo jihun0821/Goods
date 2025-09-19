@@ -1,4 +1,4 @@
-// Firebase 설정 및 초기화 - Firebase v10 호환 버전
+// Firebase 설정 및 초기화 - Firebase v10 호환 버전 (수정됨)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -37,14 +37,13 @@ try {
   console.log('✅ hanilpoint 데이터베이스 연결 성공');
   console.log('타겟 데이터베이스 ID:', currentDatabaseId);
   
-  // v10에서는 내부 구조가 달라서 직접 접근이 어려움
-  // 대신 연결 테스트로 확인
+  // 연결 테스트를 더 안전한 방식으로 수정
   setTimeout(async () => {
     try {
       const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
       
-      // 간단한 읽기 테스트로 연결 확인
-      const testDoc = doc(db, '__connection_test__', 'test');
+      // 더 안전한 연결 테스트 - 존재하지 않는 문서 읽기 시도
+      const testDoc = doc(db, 'connection_test', 'test_read');
       await getDoc(testDoc); // 문서가 없어도 연결은 확인됨
       
       console.log('🎉 hanilpoint 데이터베이스 연결 확인됨!');
@@ -78,7 +77,7 @@ window.currentDatabaseId = currentDatabaseId; // 현재 데이터베이스 ID �
 
 console.log('Firebase 전역 변수 설정 완료');
 
-// 실제 연결 테스트 및 데이터 쓰기/읽기 테스트
+// 수정된 연결 테스트 함수
 window.testFirestoreConnection = async () => {
   try {
     console.log('=== 실제 데이터베이스 연결 테스트 시작 ===');
@@ -87,8 +86,9 @@ window.testFirestoreConnection = async () => {
     
     const { doc, setDoc, getDoc, serverTimestamp, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
     
-    // 테스트 컬렉션에 문서 생성
-    const testDoc = doc(db, 'connection_test', 'db_connection_' + Date.now());
+    // 안전한 컬렉션명 사용 (예약어 피함)
+    const testDocId = 'db_test_' + Date.now();
+    const testDoc = doc(db, 'system_test', testDocId);
     const testData = {
       message: 'hanilpoint 데이터베이스 연결 테스트',
       timestamp: serverTimestamp(),
@@ -114,7 +114,7 @@ window.testFirestoreConnection = async () => {
       console.log('📍 Firebase Console에서 확인:');
       console.log(`- 프로젝트: ${app.options.projectId}`);
       console.log(`- 데이터베이스: ${window.currentDatabaseId}`);
-      console.log(`- 컬렉션: connection_test`);
+      console.log(`- 컬렉션: system_test`);
       console.log(`- 문서 ID: ${testDoc.id}`);
       
       // 테스트 문서 삭제 (정리)
@@ -145,13 +145,15 @@ window.testFirestoreConnection = async () => {
     if (error.code === 'permission-denied') {
       console.log('💡 해결책: Firestore 보안 규칙 확인 필요');
       console.log('   규칙 예시: allow read, write: if request.auth != null;');
+    } else if (error.code === 'invalid-argument') {
+      console.log('💡 해결책: 컬렉션/문서 이름이 올바른지 확인');
     }
     
     return { success: false, error: error.message };
   }
 };
 
-// 양쪽 데이터베이스 비교 테스트
+// 양쪽 데이터베이스 비교 테스트 (수정됨)
 window.compareDatabases = async () => {
   try {
     console.log('=== 기본 vs hanilpoint 데이터베이스 비교 ===');
@@ -160,11 +162,11 @@ window.compareDatabases = async () => {
     
     // 기본 데이터베이스
     const defaultDb = getFirestore(app);
-    const defaultTestDoc = doc(defaultDb, 'db_comparison', 'default_test');
+    const defaultTestDoc = doc(defaultDb, 'db_comparison', 'default_test_' + Date.now());
     
     // hanilpoint 데이터베이스  
     const hanilpointDb = getFirestore(app, 'hanilpoint');
-    const hanilpointTestDoc = doc(hanilpointDb, 'db_comparison', 'hanilpoint_test');
+    const hanilpointTestDoc = doc(hanilpointDb, 'db_comparison', 'hanilpoint_test_' + Date.now());
     
     const testData = {
       database: 'test',
@@ -173,6 +175,7 @@ window.compareDatabases = async () => {
     };
     
     // 양쪽에 모두 저장 시도
+    console.log('기본 데이터베이스에 저장 시도...');
     try {
       await setDoc(defaultTestDoc, { ...testData, database: 'default' });
       console.log('✅ 기본 데이터베이스 저장 성공');
@@ -180,6 +183,7 @@ window.compareDatabases = async () => {
       console.log('❌ 기본 데이터베이스 저장 실패:', e.message);
     }
     
+    console.log('hanilpoint 데이터베이스에 저장 시도...');
     try {
       await setDoc(hanilpointTestDoc, { ...testData, database: 'hanilpoint' });
       console.log('✅ hanilpoint 데이터베이스 저장 성공');
@@ -198,6 +202,38 @@ window.compareDatabases = async () => {
   }
 };
 
-console.log('🚀 테스트 함수 준비 완료:');
-console.log('- window.testFirestoreConnection() : 연결 테스트');
+// 간단한 권한 테스트 함수 추가
+window.testFirebasePermissions = async () => {
+  try {
+    console.log('=== Firebase 권한 테스트 ===');
+    
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    
+    // 인증 없이 읽기 시도
+    console.log('1. 인증 없는 상태에서 읽기 테스트...');
+    const testDoc = doc(db, 'hanilpoint', 'nonexistent_user');
+    
+    try {
+      await getDoc(testDoc);
+      console.log('✅ 읽기 권한 있음 (또는 문서 없음)');
+    } catch (error) {
+      if (error.code === 'permission-denied') {
+        console.log('❌ 읽기 권한 없음 - 로그인 필요');
+        console.log('💡 Firestore 규칙에서 인증된 사용자만 접근 허용 중');
+      } else {
+        console.log('⚠️ 기타 오류:', error.message);
+      }
+    }
+    
+    // 현재 인증 상태 확인
+    console.log('2. 현재 인증 상태:', window.firebaseAuth.currentUser ? '로그인됨' : '로그아웃됨');
+    
+  } catch (error) {
+    console.error('권한 테스트 실패:', error);
+  }
+};
+
+console.log('🚀 테스트 함수 준비 완료 (수정됨):');
+console.log('- window.testFirestoreConnection() : 연결 테스트 (안전한 컬렉션명 사용)');
 console.log('- window.compareDatabases() : 데이터베이스 비교');
+console.log('- window.testFirebasePermissions() : 권한 테스트');
