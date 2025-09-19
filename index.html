@@ -178,8 +178,66 @@
 
   </main>
 
-  <!-- 기존 index.html의 </main> 태그 뒤, 기존 모달들과 함께 추가 -->
+  <!-- 로그인 모달 -->
+  <div id="loginModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeLoginModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">로그인</h2>
+      <div class="space-y-4">
+        <input id="loginEmail" type="email" placeholder="아이디(이메일)" autocomplete="username" name="email" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password" name="password" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <button id="doLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
+          로그인
+        </button>
+      </div>
+      <div class="flex justify-between mt-6 text-sm">
+        <a href="#" id="openSignupLink" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-200">가입하기</a>
+        <a href="#" id="openPasswordResetLink" class="text-blue-500 hover:text-blue-600 transition-colors duration-200">비밀번호를 잊어버리셨나요?</a>
+      </div>
+    </div>
+  </div>
 
+  <!-- 회원가입 모달 -->
+  <div id="signupModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeSignupModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">회원가입</h2>
+      <div class="space-y-4">
+        <input id="signupEmail" type="email" placeholder="이메일 (@hanilgo.cnehs.kr)" name="email" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <input id="signupPassword" type="password" placeholder="비밀번호 (6자 이상)" name="password" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <input id="signupPasswordConfirm" type="password" placeholder="비밀번호 확인" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none force:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <button id="doSignup" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
+          회원가입
+        </button>
+      </div>
+      <div class="flex justify-end mt-6">
+        <a href="#" id="backToLoginLink" class="text-blue-500 hover:text-blue-600 underline text-sm transition-colors duration-200">로그인으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 비밀번호 재설정 모달 -->
+  <div id="passwordResetModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closePasswordResetModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">비밀번호 찾기</h2>
+      <div class="space-y-4">
+        <input id="resetEmail" type="email" placeholder="가입한 이메일 주소" 
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
+        <button id="doPasswordReset" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
+          비밀번호 재설정 이메일 발송
+        </button>
+      </div>
+      <div class="flex justify-end mt-6">
+        <a href="#" id="backToLoginFromResetLink" class="text-blue-500 hover:text-blue-600 underline text-sm transition-colors duration-200">로그인으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
 <!-- 충전 금액 선택 모달 -->
 <div id="chargeModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
   <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-md relative shadow-2xl modal-slide-in">
