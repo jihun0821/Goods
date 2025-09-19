@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hanil Point</title>
+  <title>Hanil Point - 충전 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
@@ -32,8 +32,34 @@
       animation: spin 1s linear infinite;
     }
     
-    .user-info-gradient {
+    /* 금액 선택 버튼 스타일 */
+    .amount-button {
+      transition: all 0.3s ease;
+    }
+    
+    .amount-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .amount-button.selected {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    /* 카카오페이 버튼 스타일 */
+    .kakaopay-btn {
+      background: #fee500;
+      color: #3c1e1e;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    
+    .kakaopay-btn:hover {
+      background: #ffd400;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(254, 229, 0, 0.3);
     }
   </style>
 </head>
@@ -121,10 +147,9 @@
         </div>
         <div class="absolute top-[154px] flex gap-4 left-6">
           <a href="https://forms.gle/AvfzgkPAgHfFFMue8" class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black">충전(현금)</a>
-          <a id="kakaopay-btn" 
-             href="https://qr.kakaopay.com/FKEMLD76B" target="_blank" class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black cursor-pointer">
+          <button id="charge-transfer-btn" class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black cursor-pointer hover:bg-[#B4C4E2] transition-colors">
              충전(이체)
-          </a>
+          </button>
           <a class="w-20 h-6 bg-[#C5D4F2] rounded-3xl flex items-center justify-center text-xs font-semibold text-black">송금</a>
         </div>
         <div class="absolute top-[139px] left-6 w-[calc(100%-48px)] h-[2px] bg-[#C5D4F2]"></div>
@@ -147,63 +172,82 @@
 
   </main>
 
-  <!-- 로그인 모달 -->
-  <div id="loginModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
-    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
-      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeLoginModal">&times;</span>
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">로그인</h2>
-      <div class="space-y-4">
-        <input id="loginEmail" type="email" placeholder="아이디(이메일)" autocomplete="username" name="email" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
-        <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password" name="password" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
-        <button id="doLogin" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
-          로그인
-        </button>
+  <!-- 충전 금액 선택 모달 -->
+  <div id="chargeModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-md relative shadow-2xl modal-slide-in">
+      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeChargeModal">&times;</span>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">포인트 충전</h2>
+      
+      <!-- 충전 금액 선택 -->
+      <div class="space-y-4 mb-6">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">충전할 금액을 선택해주세요</h3>
+        
+        <!-- 프리셋 금액 버튼들 -->
+        <div class="grid grid-cols-2 gap-3">
+          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="5000">
+            5,000원
+          </button>
+          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="10000">
+            10,000원
+          </button>
+          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="20000">
+            20,000원
+          </button>
+          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="30000">
+            30,000원
+          </button>
+          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="40000">
+            40,000원
+          </button>
+          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="50000">
+            50,000원
+          </button>
+        </div>
+        
+        <!-- 직접 입력 -->
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-gray-600">직접 입력 (1,000 ~ 50,000원)</label>
+          <div class="relative">
+            <input type="number" id="customAmount" min="1000" max="50000" step="1000" placeholder="금액을 입력하세요" 
+                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            <span class="absolute right-4 top-3 text-gray-500">원</span>
+          </div>
+        </div>
       </div>
-      <div class="flex justify-between mt-6 text-sm">
-        <a href="#" id="openSignupLink" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-200">가입하기</a>
-        <a href="#" id="openPasswordResetLink" class="text-blue-500 hover:text-blue-600 transition-colors duration-200">비밀번호를 잊어버리셨나요?</a>
+      
+      <!-- 선택된 금액 표시 -->
+      <div id="selectedAmountDisplay" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div class="text-center">
+          <span class="text-sm text-blue-600">선택된 금액</span>
+          <div id="selectedAmount" class="text-2xl font-bold text-blue-800">0원</div>
+        </div>
       </div>
+      
+      <!-- 결제 버튼 -->
+      <button id="proceedPayment" class="hidden w-full kakaopay-btn py-4 rounded-xl text-lg font-bold transition-all duration-300 hover:shadow-lg">
+        카카오페이로 결제하기
+      </button>
     </div>
   </div>
 
-  <!-- 회원가입 모달 -->
-  <div id="signupModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
-    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
-      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeSignupModal">&times;</span>
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">회원가입</h2>
-      <div class="space-y-4">
-        <input id="signupEmail" type="email" placeholder="이메일 (@hanilgo.cnehs.kr)" name="email" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
-        <input id="signupPassword" type="password" placeholder="비밀번호 (6자 이상)" name="password" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
-        <input id="signupPasswordConfirm" type="password" placeholder="비밀번호 확인" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none force:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
-        <button id="doSignup" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
-          회원가입
+  <!-- 결제 완료 확인 모달 -->
+  <div id="paymentConfirmModal" class="hidden fixed z-[1100] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
+    <div class="bg-white mx-auto my-[15%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
+      <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">결제 완료 확인</h2>
+      
+      <div class="text-center mb-6">
+        <div class="text-4xl mb-4">💳</div>
+        <p class="text-gray-600 mb-2">결제를 완료하셨나요?</p>
+        <p class="text-sm text-gray-500">결제를 완료하셨다면 '예'를,<br>결제를 취소하거나 실패했다면 '아니요'를 선택해주세요.</p>
+      </div>
+      
+      <div class="space-y-3">
+        <button id="paymentSuccess" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-all duration-200">
+          예, 결제를 완료했습니다
         </button>
-      </div>
-      <div class="flex justify-end mt-6">
-        <a href="#" id="backToLoginLink" class="text-blue-500 hover:text-blue-600 underline text-sm transition-colors duration-200">로그인으로 돌아가기</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- 비밀번호 재설정 모달 -->
-  <div id="passwordResetModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
-    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
-      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closePasswordResetModal">&times;</span>
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">비밀번호 찾기</h2>
-      <div class="space-y-4">
-        <input id="resetEmail" type="email" placeholder="가입한 이메일 주소" 
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]" />
-        <button id="doPasswordReset" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
-          비밀번호 재설정 이메일 발송
+        <button id="paymentFailed" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition-all duration-200">
+          아니요, 결제하지 않았습니다
         </button>
-      </div>
-      <div class="flex justify-end mt-6">
-        <a href="#" id="backToLoginFromResetLink" class="text-blue-500 hover:text-blue-600 underline text-sm transition-colors duration-200">로그인으로 돌아가기</a>
       </div>
     </div>
   </div>
@@ -218,10 +262,261 @@
     <div class="absolute left-1/2 top-1/2 w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full spinner-animation"></div>
   </div>
 
-  <!-- JavaScript 파일들 - 로딩 순서 중요! -->
-  <script type="module" src="firebase-config.js"></script>
-  <script type="module" src="auth.js"></script>
-  <script type="module" src="ui.js"></script>
+  <script>
+    // 시뮬레이션을 위한 가상 사용자 데이터
+    let currentUser = {
+      uid: 'demo-user',
+      email: 'demo@hanilgo.cnehs.kr',
+      points: 15000
+    };
+    
+    let pendingCharge = null; // 결제 대기 중인 충전 정보
+    
+    // DOM 요소들
+    const chargeTransferBtn = document.getElementById('charge-transfer-btn');
+    const chargeModal = document.getElementById('chargeModal');
+    const closeChargeModal = document.getElementById('closeChargeModal');
+    const paymentConfirmModal = document.getElementById('paymentConfirmModal');
+    const userPointsElement = document.getElementById('userPoints');
+    
+    const amountButtons = document.querySelectorAll('.amount-button');
+    const customAmountInput = document.getElementById('customAmount');
+    const selectedAmountDisplay = document.getElementById('selectedAmountDisplay');
+    const selectedAmountElement = document.getElementById('selectedAmount');
+    const proceedPaymentBtn = document.getElementById('proceedPayment');
+    
+    const paymentSuccessBtn = document.getElementById('paymentSuccess');
+    const paymentFailedBtn = document.getElementById('paymentFailed');
+    
+    let selectedAmount = 0;
+    
+    // 알림 표시 함수
+    function showNotification(message, type = 'info') {
+      const notification = document.getElementById('notification');
+      const notificationMessage = document.getElementById('notificationMessage');
+      
+      if (!notification || !notificationMessage) return;
+      
+      notificationMessage.textContent = message;
+      notification.className = '';
+      notification.className = 'fixed top-5 right-5 z-[2000] p-4 rounded-lg font-medium shadow-lg min-w-[200px] transform transition-transform duration-300 ease-out max-md:right-3 max-md:left-3 max-md:transform max-md:translate-x-0 max-md:transition-transform max-md:duration-300 max-md:ease-out';
+      
+      if (type === 'success') {
+        notification.classList.add('bg-emerald-500', 'text-white');
+      } else if (type === 'error') {
+        notification.classList.add('bg-red-500', 'text-white');
+      } else {
+        notification.classList.add('bg-blue-500', 'text-white');
+      }
+      
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        notification.classList.remove('-translate-y-[100px]');
+        notification.classList.add('translate-y-0');
+      } else {
+        notification.classList.remove('translate-x-[400px]');
+        notification.classList.add('translate-x-0');
+      }
+      
+      setTimeout(() => {
+        if (isMobile) {
+          notification.classList.remove('translate-y-0');
+          notification.classList.add('-translate-y-[100px]');
+        } else {
+          notification.classList.remove('translate-x-0');
+          notification.classList.add('translate-x-[400px]');
+        }
+      }, 5000);
+    }
+    
+    // 모달 표시/숨김
+    function showModal(modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('block');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function hideModal(modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('block');
+      document.body.style.overflow = 'auto';
+    }
+    
+    // 포인트 업데이트
+    function updatePointsDisplay() {
+      if (userPointsElement) {
+        userPointsElement.textContent = currentUser.points.toLocaleString();
+      }
+    }
+    
+    // 금액 선택 처리
+    function selectAmount(amount) {
+      selectedAmount = amount;
+      
+      // 모든 버튼 선택 해제
+      amountButtons.forEach(btn => btn.classList.remove('selected'));
+      
+      // 해당하는 버튼이 있으면 선택 표시
+      const matchingBtn = document.querySelector(`[data-amount="${amount}"]`);
+      if (matchingBtn) {
+        matchingBtn.classList.add('selected');
+        customAmountInput.value = '';
+      }
+      
+      // 선택된 금액 표시
+      selectedAmountElement.textContent = amount.toLocaleString() + '원';
+      selectedAmountDisplay.classList.remove('hidden');
+      proceedPaymentBtn.classList.remove('hidden');
+    }
+    
+    // 카카오페이 결제 URL 생성 (실제로는 서버에서 처리해야 함)
+    function generateKakaoPayUrl(amount) {
+      // 실제 환경에서는 서버 API를 통해 카카오페이 결제 URL을 생성해야 합니다.
+      // 여기서는 시뮬레이션을 위해 기존 URL을 사용합니다.
+      return 'https://qr.kakaopay.com/FKEMLD76B';
+    }
+    
+    // 결제 진행
+    function proceedPayment() {
+      if (selectedAmount === 0) {
+        showNotification('충전할 금액을 선택해주세요.', 'error');
+        return;
+      }
+      
+      if (selectedAmount < 1000 || selectedAmount > 50000) {
+        showNotification('충전 금액은 1,000원 이상 50,000원 이하여야 합니다.', 'error');
+        return;
+      }
+      
+      // 현재 포인트와 충전 금액의 합이 50,000을 초과하는지 확인
+      if (currentUser.points + selectedAmount > 50000) {
+        showNotification('포인트 한도 50,000원을 초과할 수 없습니다.', 'error');
+        return;
+      }
+      
+      // 로컬에 임시 저장
+      pendingCharge = {
+        amount: selectedAmount,
+        timestamp: Date.now(),
+        originalPoints: currentUser.points
+      };
+      
+      // 로컬 스토리지에 임시 저장 (실제로는 메모리에 저장)
+      console.log('결제 대기 정보 저장:', pendingCharge);
+      
+      // 결제 URL로 이동
+      const paymentUrl = generateKakaoPayUrl(selectedAmount);
+      
+      hideModal(chargeModal);
+      showNotification('결제 페이지로 이동합니다...', 'info');
+      
+      // 새 창에서 결제 페이지 열기
+      const paymentWindow = window.open(paymentUrl, '_blank', 'width=500,height=600');
+      
+      // 결제 창이 닫히거나 포커스가 돌아올 때 확인 모달 표시
+      const checkPaymentWindow = setInterval(() => {
+        if (paymentWindow.closed) {
+          clearInterval(checkPaymentWindow);
+          setTimeout(() => {
+            showModal(paymentConfirmModal);
+          }, 1000);
+        }
+      }, 1000);
+      
+      // 5초 후에도 창이 열려있으면 확인 모달 표시 (사용자가 다시 돌아온 경우)
+      setTimeout(() => {
+        if (!paymentWindow.closed) {
+          showModal(paymentConfirmModal);
+        }
+      }, 5000);
+    }
+    
+    // 결제 성공 처리
+    function handlePaymentSuccess() {
+      if (!pendingCharge) {
+        showNotification('결제 정보를 찾을 수 없습니다.', 'error');
+        return;
+      }
+      
+      // 데이터베이스에 반영 (실제로는 서버 API 호출)
+      currentUser.points += pendingCharge.amount;
+      
+      // UI 업데이트
+      updatePointsDisplay();
+      
+      // 결제 정보 초기화
+      pendingCharge = null;
+      
+      hideModal(paymentConfirmModal);
+      showNotification(`${pendingCharge?.amount.toLocaleString()}원이 성공적으로 충전되었습니다!`, 'success');
+      
+      console.log('포인트 충전 완료:', currentUser);
+    }
+    
+    // 결제 실패 처리
+    function handlePaymentFailed() {
+      if (pendingCharge) {
+        console.log('결제 취소, 임시 데이터 삭제:', pendingCharge);
+        pendingCharge = null;
+      }
+      
+      hideModal(paymentConfirmModal);
+      showNotification('결제가 취소되었습니다.', 'info');
+    }
+    
+    // 이벤트 리스너 설정
+    chargeTransferBtn.addEventListener('click', () => {
+      if (!currentUser) {
+        showNotification('로그인이 필요합니다.', 'error');
+        return;
+      }
+      showModal(chargeModal);
+    });
+    
+    closeChargeModal.addEventListener('click', () => hideModal(chargeModal));
+    
+    // 금액 버튼 이벤트
+    amountButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const amount = parseInt(button.dataset.amount);
+        selectAmount(amount);
+      });
+    });
+    
+    // 직접 입력 이벤트
+    customAmountInput.addEventListener('input', (e) => {
+      const amount = parseInt(e.target.value) || 0;
+      if (amount >= 1000 && amount <= 50000) {
+        selectAmount(amount);
+        amountButtons.forEach(btn => btn.classList.remove('selected'));
+      } else if (amount > 0) {
+        selectedAmountDisplay.classList.add('hidden');
+        proceedPaymentBtn.classList.add('hidden');
+      }
+    });
+    
+    // 결제 진행 버튼
+    proceedPaymentBtn.addEventListener('click', proceedPayment);
+    
+    // 결제 완료 확인 버튼들
+    paymentSuccessBtn.addEventListener('click', handlePaymentSuccess);
+    paymentFailedBtn.addEventListener('click', handlePaymentFailed);
+    
+    // 모달 외부 클릭 시 닫기
+    window.addEventListener('click', (e) => {
+      if (e.target === chargeModal) {
+        hideModal(chargeModal);
+      }
+      if (e.target === paymentConfirmModal) {
+        // 결제 확인 모달은 외부 클릭으로 닫지 않음
+      }
+    });
+    
+    // 초기 포인트 표시
+    updatePointsDisplay();
+    
+    console.log('충전 시스템 초기화 완료');
+  </script>
 
 </body>
 </html>
