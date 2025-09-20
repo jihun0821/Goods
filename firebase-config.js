@@ -1,4 +1,4 @@
-// Firebase 설정 및 초기화 - Firebase v10 호환 버전 (수정됨)
+// Firebase 설정 및 초기화 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -232,8 +232,3 @@ window.testFirebasePermissions = async () => {
     console.error('권한 테스트 실패:', error);
   }
 };
-
-console.log('🚀 테스트 함수 준비 완료 (수정됨):');
-console.log('- window.testFirestoreConnection() : 연결 테스트 (안전한 컬렉션명 사용)');
-console.log('- window.compareDatabases() : 데이터베이스 비교');
-console.log('- window.testFirebasePermissions() : 권한 테스트');
