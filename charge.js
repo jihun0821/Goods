@@ -1,4 +1,4 @@
-// charge.js - 기존 auth.js와 연동하는 충전 시스템
+// 충전 시스템
 import { 
   doc, 
   setDoc, 
@@ -408,7 +408,6 @@ function initializeChargeSystem() {
   checkDependencies();
 }
 
-// DOM이 준비되면 초기화
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeChargeSystem);
 } else {
