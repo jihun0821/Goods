@@ -1,4 +1,4 @@
-// Firebase Auth 모듈 import
+// Firebase Auth 모듈 불러오기
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
@@ -17,7 +17,7 @@ import {
 
 let currentUser = null;
 
-// UI 요소들 (한 곳에서만 관리)
+// UI 요소들 (한 곳에서 관리)
 let loginModal, signupModal, passwordResetModal, authButton, authButtonText, userPoints, notification, notificationMessage, loadingSpinner;
 
 // DOM이 로드된 후 요소들 가져오기
@@ -193,7 +193,7 @@ async function createUserProfile(user, additionalData = {}) {
     // hanilpoint에만 프로필 저장 (기존 데이터 보존하며 업데이트)
     const userData = {
       uid,
-      displayName: finalDisplayName, // 기존 이름 우선 보존
+      displayName: finalDisplayName, 
       email,
       points: userSnapshot.exists() ? (userSnapshot.data().points || 0) : 0,
       createdAt: userSnapshot.exists() ? userSnapshot.data().createdAt : serverTimestamp(),
@@ -286,7 +286,7 @@ async function updateUserUI(user) {
     
     // hanilpoint 데이터베이스에서만 사용자 프로필 가져오기
     let userProfile = null;
-    let displayName = user.email.split('@')[0]; // 기본값
+    let displayName = user.email.split('@')[0]; 
     let userEmail = user.email;
     let points = 0;
     
@@ -321,7 +321,7 @@ async function updateUserUI(user) {
     }
     
     if (authButton) {
-      // User Box HTML 구조로 변경
+      // User Box HTML 구조
       authButton.innerHTML = `
         <div class="flex items-center gap-3 w-full">
           <img class="w-12 h-12 rounded-full" src="/-/images/profile.png" alt="user" />
@@ -337,14 +337,14 @@ async function updateUserUI(user) {
       authButton.className = "w-full md:w-72 h-16 bg-zinc-100 rounded-3xl backdrop-blur-[2px] relative flex items-center px-4 flex-shrink-0 cursor-pointer hover:bg-zinc-200 transition-all duration-300";
     }
     
-    // hanilpoint에서 가져온 포인트만 표시
+    // hanilpoint에서 가져온 포인트 표시
     if (userPoints) {
       userPoints.textContent = points.toLocaleString();
     }
     
     console.log('✅ UI 업데이트 완료');
   } else {
-    // 로그아웃 상태 - 로그인 버튼으로 복원
+    // 로그아웃 상태/로그인 버튼으로 복원
     if (authButton) {
       authButton.innerHTML = `
         <div class="flex items-center gap-3">
@@ -842,15 +842,6 @@ window.authFunctions = {
   getUserProfile,
   showNotification,
   updateUserUI,
-  showLoading,
-  hideAllModals,
-  // 디버깅 도구 추가
+  showLoading,  
   debug: window.debugHanilpoint
 };
-
-console.log('✅ auth.js 초기화 완료 - hanilpoint 전용 모드');
-console.log('🔧 디버깅 도구 사용법:');
-console.log('- window.debugHanilpoint.checkConnection() : 연결 상태 확인');
-console.log('- window.debugHanilpoint.checkUserData() : hanilpoint 데이터 확인');
-console.log('- window.debugHanilpoint.checkDefaultProfile() : default profile 확인');
-console.log('- window.debugHanilpoint.forceUpdateName("새이름") : 이름 강제 변경');
