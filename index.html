@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hanil Point - 충전 시스템</title>
+  <title>Hanil Point</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
-    /* Custom animations and gradients */
+    /* 애니메이션 css 스타일 */
     @keyframes modalSlideIn {
       from {
         opacity: 0;
@@ -32,7 +32,7 @@
       animation: spin 1s linear infinite;
     }
     
-    /* 금액 선택 버튼 스타일 */
+    /* 금액 버튼 스타일 */
     .amount-button {
       transition: all 0.3s ease;
     }
@@ -48,18 +48,51 @@
       transform: scale(1.05);
     }
     
-    /* 카카오페이 버튼 스타일 */
-    .kakaopay-btn {
+    /* 지불 버튼 스타일 */
+    .pay-btn {
       background: #fee500;
       color: #3c1e1e;
       font-weight: bold;
       transition: all 0.3s ease;
     }
     
-    .kakaopay-btn:hover {
+    .pay-btn:hover {
       background: #ffd400;
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(254, 229, 0, 0.3);
+    }
+
+    /* 버튼 애니메이션 */
+    .amount-button {
+      transition: all 0.3s ease;
+    }
+
+    .amount-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+
+    .amount-button.selected {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border-color: #1d4ed8;
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    #proceedPayment {
+      background: linear-gradient(135deg, #fee500 0%, #ffd400 100%);
+      box-shadow: 0 4px 15px rgba(254, 229, 0, 0.3);
+    }
+
+    #proceedPayment:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(254, 229, 0, 0.4);
+    }
+
+    #paymentSuccess:hover, #paymentFailed:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
   </style>
 </head>
@@ -75,15 +108,15 @@
     </nav>
   </header>
 
-  <!-- Sidebar (PC 전용 - 고정) -->
+  <!-- 왼쪽사이드바 (PC 전용 - 고정) -->
   <aside class="hidden md:flex fixed top-0 left-0 w-44 h-screen bg-white border-r border-zinc-100 p-4 flex-col">
-    <!-- Logo -->
+    <!-- 내용물 -->
     <div class="flex items-center gap-2 mb-10">
       <img class="w-6 h-6" src="/-/images/HP1.png" alt="logo" />
       <span class="text-black font-semibold text-base">HANIL POINT</span>
     </div>
 
-    <!-- Menu -->
+    <!-- 이동 메뉴 -->
     <div class="space-y-1">
       <div class="h-10 px-4 flex items-center gap-4 rounded-lg bg-neutral-100 cursor-pointer">
         <img src="/-/images/HOME.png" alt="icon" class="w-[25px] h-[25px]" />
@@ -100,15 +133,15 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
+  <!-- 메인 부분 -->
   <main class="flex-1 flex flex-col min-h-screen md:ml-44 pt-[72px] md:pt-6 p-6 box-border">
 
-    <!-- 상단 영역 -->
+    <!-- 상단 바 -->
     <div class="flex flex-col mb-4 space-y-6 flex-shrink-0">
-      <!-- User Info + Notices -->
+      <!-- 공지 + 유저 바 공통 -->
       <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
 
-        <!-- Notices (모바일에서 숨김) -->
+        <!-- 공지 (모바일에서 숨김) -->
         <div class="hidden md:flex flex-col space-y-2 w-full md:max-w-[400px]">
           <div class="flex items-center gap-2">
             <div class="w-12 h-6 rounded-3xl flex items-center justify-center text-xs font-semibold text-red-500 bg-rose-300/30">공지</div>
@@ -124,7 +157,7 @@
           </div>
         </div>
 
-        <!-- Login/User Info Button -->
+        <!-- 유저 부분 -->
         <div id="authButton" class="w-full md:w-72 h-16 bg-white border-2 border-[#C5D4F2] rounded-3xl flex items-center justify-center px-4 flex-shrink-0 cursor-pointer hover:shadow-lg transition-all duration-300">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 bg-zinc-300/90 rounded-full flex items-center justify-center">
@@ -248,7 +281,7 @@
     <div class="space-y-4 mb-6">
       <h3 class="text-lg font-semibold text-gray-700 mb-4">충전할 금액을 선택해주세요</h3>
       
-      <!-- 프리셋 금액 버튼들 -->
+      <!-- 정해진 금액 버튼들 -->
       <div class="grid grid-cols-2 gap-3">
         <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold hover:border-blue-400 transition-all duration-300" data-amount="5000">
           5,000원
@@ -317,124 +350,6 @@
     </div>
   </div>
 </div>
-
-<!-- 추가 CSS 스타일 -->
-<style>
-/* 금액 선택 버튼 애니메이션 */
-.amount-button {
-  transition: all 0.3s ease;
-}
-
-.amount-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-}
-
-.amount-button.selected {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-  border-color: #1d4ed8;
-  transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-}
-
-/* 카카오페이 버튼 스타일 개선 */
-#proceedPayment {
-  background: linear-gradient(135deg, #fee500 0%, #ffd400 100%);
-  box-shadow: 0 4px 15px rgba(254, 229, 0, 0.3);
-}
-
-#proceedPayment:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(254, 229, 0, 0.4);
-}
-
-/* 결제 확인 모달 버튼 개선 */
-#paymentSuccess:hover, #paymentFailed:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-</style>
-
-  <!-- 충전 금액 선택 모달 -->
-  <div id="chargeModal" class="hidden fixed z-[1000] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
-    <div class="bg-white mx-auto my-[5%] p-8 border-none rounded-2xl w-[90%] max-w-md relative shadow-2xl modal-slide-in">
-      <span class="text-gray-400 float-right text-3xl font-bold absolute right-4 top-4 cursor-pointer transition-colors hover:text-black focus:text-black" id="closeChargeModal">&times;</span>
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">포인트 충전</h2>
-      
-      <!-- 충전 금액 선택 -->
-      <div class="space-y-4 mb-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">충전할 금액을 선택해주세요</h3>
-        
-        <!-- 프리셋 금액 버튼들 -->
-        <div class="grid grid-cols-2 gap-3">
-          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="5000">
-            5,000원
-          </button>
-          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="10000">
-            10,000원
-          </button>
-          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="20000">
-            20,000원
-          </button>
-          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="30000">
-            30,000원
-          </button>
-          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="40000">
-            40,000원
-          </button>
-          <button class="amount-button h-12 rounded-xl border-2 border-gray-300 bg-white text-gray-700 font-semibold" data-amount="50000">
-            50,000원
-          </button>
-        </div>
-        
-        <!-- 직접 입력 -->
-        <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-600">직접 입력 (1,000 ~ 50,000원)</label>
-          <div class="relative">
-            <input type="number" id="customAmount" min="1000" max="50000" step="1000" placeholder="금액을 입력하세요" 
-                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
-            <span class="absolute right-4 top-3 text-gray-500">원</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 선택된 금액 표시 -->
-      <div id="selectedAmountDisplay" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-        <div class="text-center">
-          <span class="text-sm text-blue-600">선택된 금액</span>
-          <div id="selectedAmount" class="text-2xl font-bold text-blue-800">0원</div>
-        </div>
-      </div>
-      
-      <!-- 결제 버튼 -->
-      <button id="proceedPayment" class="hidden w-full kakaopay-btn py-4 rounded-xl text-lg font-bold transition-all duration-300 hover:shadow-lg">
-        카카오페이로 결제하기
-      </button>
-    </div>
-  </div>
-
-  <!-- 결제 완료 확인 모달 -->
-  <div id="paymentConfirmModal" class="hidden fixed z-[1100] left-0 top-0 w-full h-full overflow-auto bg-black/50 backdrop-blur-[5px]">
-    <div class="bg-white mx-auto my-[15%] p-8 border-none rounded-2xl w-[90%] max-w-sm relative shadow-2xl modal-slide-in">
-      <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">결제 완료 확인</h2>
-      
-      <div class="text-center mb-6">
-        <div class="text-4xl mb-4">💳</div>
-        <p class="text-gray-600 mb-2">결제를 완료하셨나요?</p>
-        <p class="text-sm text-gray-500">결제를 완료하셨다면 '예'를,<br>결제를 취소하거나 실패했다면 '아니요'를 선택해주세요.</p>
-      </div>
-      
-      <div class="space-y-3">
-        <button id="paymentSuccess" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-all duration-200">
-          예, 결제를 완료했습니다
-        </button>
-        <button id="paymentFailed" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition-all duration-200">
-          아니요, 결제하지 않았습니다
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- 알림 메시지 -->
   <div id="notification" class="fixed top-5 right-5 z-[2000] p-4 rounded-lg font-medium shadow-lg min-w-[200px] transform translate-x-[400px] transition-transform duration-300 ease-out max-md:right-3 max-md:left-3 max-md:transform max-md:-translate-y-[100px] max-md:translate-x-0 max-md:transition-transform max-md:duration-300 max-md:ease-out">
