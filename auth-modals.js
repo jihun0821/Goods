@@ -814,3 +814,23 @@ async function showUserProfile() {
             const pointsDocRef = window.firebase.doc(db, 'user_points', user.uid);
             const pointsDoc = await window.firebase.getDoc(pointsDocRef);
             profileData.points = pointsDoc.exists() ? pointsDoc.data().points || 0 : 0;
+
+            // 전역 변수에 저장
+            currentUserProfile = profileData;
+
+            // UI 업데이트
+            updateUIForAuthState(true, profileData);
+
+            } catch (error) {
+                console.error('프로필 로드 실패:', error);
+                updateUIForAuthState(true, {
+                    email: user.email,
+                    nickname: user.displayName || user.email.split('@')[0],
+                    points: 0
+                });
+            }
+            } else {
+                updateUIForAuthState(false);
+            }
+            }
+
