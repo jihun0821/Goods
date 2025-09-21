@@ -76,16 +76,28 @@
             <!-- 오늘의 경기 -->
             <div class="today-match-section">
                 <h2 class="section-title">오늘의 경기</h2>
-                <div class="match-display">
+                <div class="match-display" id="matchDisplay">
                     <button class="nav-btn" id="prevMatch">‹</button>
-                    <div class="match-info">
-                        <div class="match-date">2025-09-15</div>
-                        <div class="match-teams">C103 VS C102</div>
+                    <div class="match-info" id="matchInfo">
+                        <div class="match-date" id="matchDate">경기를 불러오는 중...</div>
+                        <div class="match-teams" id="matchTeams">-</div>
+                        <div class="match-score" id="matchScore" style="display: none;">-</div>
+                        <div class="match-status" id="matchStatus">예정</div>
                     </div>
-                    <div class="match-chats"></div>
+                    <div class="match-chats" id="matchChats">
+                        <button class="match-details-btn" id="matchDetailsBtn" onclick="openMatchDetailsPanel()" style="display: none;">
+                            상세보기
+                        </button>
+                    </div>
                     <button class="nav-btn" id="nextMatch">›</button>
                 </div>
+    
+                <!-- 경기가 없을 때 표시 -->
+                <div class="no-matches" id="noMatches" style="display: none; text-align: center; padding: 20px; color: #666;">
+                    오늘 예정된 경기가 없습니다.
+                </div>
             </div>
+        </div>
 
             <!-- 네비게이션 링크들 -->
             <div class="nav-links">
