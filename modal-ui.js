@@ -161,25 +161,6 @@ function setupEventListeners() {
         });
     }
     
-    // 경기 정보 클릭 이벤트 리스너 추가
-    const matchInfo = document.querySelector('.match-info');
-    if (matchInfo) {
-        matchInfo.addEventListener('click', () => {
-            // 현재 표시된 경기의 ID를 생성하거나 가져오기
-            const matchDate = document.querySelector('.match-date')?.textContent || '';
-            const matchTeams = document.querySelector('.match-teams')?.textContent || '';
-            
-            // 간단한 매치 ID 생성 (날짜와 팀 정보 기반)
-            const matchId = `${matchDate}-${matchTeams.replace(/\s/g, '')}`;
-            
-            console.log(`경기 정보 클릭됨: ${matchId}`);
-            openMatchPanel(matchId);
-        });
-        
-        // 마우스 호버 효과를 위한 스타일 추가
-        matchInfo.style.cursor = 'pointer';
-    }
-    
     // 로그인 관련
     const doLoginBtn = document.getElementById('doLogin');
     if (doLoginBtn) doLoginBtn.addEventListener('click', window.handleLogin);
