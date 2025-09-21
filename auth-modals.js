@@ -495,8 +495,11 @@ function updateUIForAuthState(isLoggedIn, profileData = null) {
             const avatarUrl = profileData.avatar_url || defaultAvatar;
             
             profileCard.innerHTML = `
-                <div class="profile-img">
+                <div class="profile-img" onclick="openProfileEditModal(currentUserProfile)" style="cursor: pointer; position: relative; transition: transform 0.3s ease;" title="프로필 편집하기">
                     <img src="${avatarUrl}" alt="프로필" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;" class="edit-overlay">
+                        편집
+                    </div>
                 </div>
                 <div id="profileName">${profileData.nickname || '사용자'}</div>
                 <div class="profile-stats">
@@ -504,10 +507,23 @@ function updateUIForAuthState(isLoggedIn, profileData = null) {
                     <div>포인트 순위: <span id="pointRank">-</span></div>
                     <div><span id="classRank">-</span>/<span id="totalRank">-</span></div>
                 </div>
-                <button onclick="openProfileEditModal(currentUserProfile)" class="profile-edit-btn" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #27AE60; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                    프로필 편집
-                </button>
             `;
+            
+            // 프로필 이미지 호버 효과 추가
+            const profileImg = profileCard.querySelector('.profile-img');
+            const editOverlay = profileCard.querySelector('.edit-overlay');
+            
+            if (profileImg && editOverlay) {
+                profileImg.addEventListener('mouseenter', () => {
+                    profileImg.style.transform = 'scale(1.05)';
+                    editOverlay.style.opacity = '1';
+                });
+                
+                profileImg.addEventListener('mouseleave', () => {
+                    profileImg.style.transform = 'scale(1)';
+                    editOverlay.style.opacity = '0';
+                });
+            }
         }
         
     } else {
