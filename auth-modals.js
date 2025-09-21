@@ -12,11 +12,6 @@ const firebaseConfig = {
 // Firebase 초기화 및 전역 변수 설정
 let app, db, auth, storage;
 
-// 경기 데이터 관리 변수들
-let matchesData = [];
-let currentMatchIndex = 0;
-let isLoadingMatches = false;
-
 // Firebase 초기화 함수
 function initializeFirebase() {
     if (window.firebase && window.firebase.initializeApp) {
@@ -62,410 +57,6 @@ const overlay = document.getElementById('overlay');
 // 현재 사용자 프로필 데이터
 let currentUserProfile = null;
 let isAdmin = false;
-
-// ===== 경기 데이터 관리 함수들 =====
-
-// Firebase 초기화 후 경기 데이터 로드
-async function initializeMatchData() {
-    if (!window.db) {
-        console.log('Firebase가 아직 초기화되지 않았습니다. 재시도 중...');
-        setTimeout(initializeMatchData, 500);
-        return;
-    }
-    
-    try {
-        await loadTodayMatches();
-        setupMatchNavigation();
-    } catch (error) {
-        console.error('경기 데이터 초기화 실패:', error);
-    }
-}
-
-// 오늘의 경기 데이터 로드
-async function loadTodayMatches() {
-    if (isLoadingMatches) return;
-    
-    isLoadingMatches = true;
-    
-    try {
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD 형식
-        
-        console.log('오늘 날짜:', todayString);
-        
-        // Firestore에서 오늘의 경기 조회
-        const matchesCollection = window.firebase.collection(window.db, 'matches');
-        const todayQuery = window.firebase.query(
-            matchesCollection,
-            window.firebase.where('date', '==', todayString)
-        );
-        
-        const querySnapshot = await window.firebase.getDocs(todayQuery);
-        
-        matchesData = [];
-        querySnapshot.forEach((doc) => {
-            const matchData = doc.data();
-            matchesData.push({
-                id: doc.id,
-                ...matchData
-            });
-        });
-        
-        // 시간순으로 정렬
-        matchesData.sort((a, b) => {
-            if (!a.time || !b.time) return 0;
-            return a.time.localeCompare(b.time);
-        });
-        
-        console.log('로드된 경기 데이터:', matchesData);
-        
-        // UI 업데이트
-        updateMatchDisplay();
-        
-    } catch (error) {
-        console.error('경기 데이터 로드 실패:', error);
-        showNoMatchesMessage();
-    } finally {
-        isLoadingMatches = false;
-    }
-}
-
-// 경기 표시 업데이트
-function updateMatchDisplay() {
-    const matchDisplay = document.getElementById('matchDisplay');
-    const noMatches = document.getElementById('noMatches');
-    const matchDate = document.getElementById('matchDate');
-    const matchTeams = document.getElementById('matchTeams');
-    const matchScore = document.getElementById('matchScore');
-    const matchStatus = document.getElementById('matchStatus');
-    const matchDetailsBtn = document.getElementById('matchDetailsBtn');
-    const prevBtn = document.getElementById('prevMatch');
-    const nextBtn = document.getElementById('nextMatch');
-    
-    if (!matchesData || matchesData.length === 0) {
-        showNoMatchesMessage();
-        return;
-    }
-    
-    // 경기가 있을 때
-    if (matchDisplay) matchDisplay.style.display = 'flex';
-    if (noMatches) noMatches.style.display = 'none';
-    
-    // 현재 경기 데이터
-    const currentMatch = matchesData[currentMatchIndex];
-    
-    if (!currentMatch) {
-        showNoMatchesMessage();
-        return;
-    }
-    
-    // 날짜 및 시간 표시
-    if (matchDate) {
-        const dateText = currentMatch.date || '날짜 미정';
-        const timeText = currentMatch.time ? ` ${currentMatch.time}` : '';
-        matchDate.textContent = `${dateText}${timeText}`;
-    }
-    
-    // 팀 이름 표시
-    if (matchTeams) {
-        const homeTeam = currentMatch.home_team || '팀1';
-        const awayTeam = currentMatch.away_team || '팀2';
-        matchTeams.textContent = `${homeTeam} VS ${awayTeam}`;
-    }
-    
-    // 점수 표시 (경기 완료시)
-    if (matchScore) {
-        if (currentMatch.status === 'completed' && 
-            currentMatch.home_score !== undefined && 
-            currentMatch.away_score !== undefined) {
-            matchScore.textContent = `${currentMatch.home_score} : ${currentMatch.away_score}`;
-            matchScore.style.display = 'block';
-        } else {
-            matchScore.style.display = 'none';
-        }
-    }
-    
-    // 경기 상태 표시
-    if (matchStatus) {
-        let statusText = '예정';
-        switch (currentMatch.status) {
-            case 'scheduled':
-                statusText = '예정';
-                break;
-            case 'live':
-                statusText = '진행중';
-                break;
-            case 'completed':
-                statusText = '완료';
-                break;
-            case 'cancelled':
-                statusText = '취소';
-                break;
-            default:
-                statusText = '예정';
-        }
-        matchStatus.textContent = statusText;
-        
-        // 상태에 따른 스타일링
-        matchStatus.className = `match-status ${currentMatch.status || 'scheduled'}`;
-    }
-    
-    // 상세보기 버튼 표시/숨기기
-    if (matchDetailsBtn) {
-        matchDetailsBtn.style.display = 'block';
-        matchDetailsBtn.onclick = () => openMatchDetailsPanel(currentMatch);
-    }
-    
-    // 네비게이션 버튼 상태 업데이트
-    if (prevBtn) {
-        prevBtn.disabled = currentMatchIndex === 0;
-        prevBtn.style.opacity = currentMatchIndex === 0 ? '0.5' : '1';
-    }
-    
-    if (nextBtn) {
-        nextBtn.disabled = currentMatchIndex >= matchesData.length - 1;
-        nextBtn.style.opacity = currentMatchIndex >= matchesData.length - 1 ? '0.5' : '1';
-    }
-    
-    console.log(`현재 표시중인 경기: ${currentMatchIndex + 1}/${matchesData.length}`);
-}
-
-// 경기가 없을 때 메시지 표시
-function showNoMatchesMessage() {
-    const matchDisplay = document.getElementById('matchDisplay');
-    const noMatches = document.getElementById('noMatches');
-    const matchDate = document.getElementById('matchDate');
-    const matchTeams = document.getElementById('matchTeams');
-    
-    if (matchDisplay) matchDisplay.style.display = 'none';
-    if (noMatches) noMatches.style.display = 'block';
-    
-    // 기본값으로 리셋
-    if (matchDate) matchDate.textContent = '경기 없음';
-    if (matchTeams) matchTeams.textContent = '-';
-}
-
-// 경기 네비게이션 설정
-function setupMatchNavigation() {
-    const prevBtn = document.getElementById('prevMatch');
-    const nextBtn = document.getElementById('nextMatch');
-    
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            if (currentMatchIndex > 0) {
-                currentMatchIndex--;
-                updateMatchDisplay();
-            }
-        });
-    }
-    
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            if (currentMatchIndex < matchesData.length - 1) {
-                currentMatchIndex++;
-                updateMatchDisplay();
-            }
-        });
-    }
-    
-    console.log('경기 네비게이션 설정 완료');
-}
-
-// 경기 상세 패널 열기 (통합된 버전)
-function openMatchDetailsPanel(matchData) {
-    if (!matchData) {
-        matchData = matchesData[currentMatchIndex];
-    }
-    
-    if (!matchData) {
-        console.error('표시할 경기 데이터가 없습니다.');
-        return;
-    }
-    
-    console.log('경기 상세 패널 열기:', matchData);
-    
-    // 경기 상세 정보를 패널에 로드
-    loadMatchDetailsInPanel(matchData);
-    
-    // 패널 열기
-    openMatchPanel(matchData.id);
-}
-
-// 경기 상세 정보를 패널에 로드
-function loadMatchDetailsInPanel(matchData) {
-    const panelContent = document.getElementById('panelContent');
-    const panelTitle = document.getElementById('panelTitle');
-    
-    if (panelTitle) {
-        panelTitle.textContent = `${matchData.homeTeam} VS ${matchData.awayTeam}`;
-    }
-    
-    if (panelContent) {
-        const statusText = getMatchStatusText(matchData.status);
-        const scoreSection = matchData.status === 'finished' ? 
-            `<div class="match-final-score">
-                <h3>최종 스코어</h3>
-                <div class="score-display">
-                    <span class="team-score">${matchData.homeTeam} ${matchData.homeScore || 0}</span>
-                    <span class="score-separator">:</span>
-                    <span class="team-score">${matchData.awayScore || 0} ${matchData.awayTeam}</span>
-                </div>
-            </div>` : '';
-
-        // 라인업 섹션 (lineups가 있는 경우)
-        const lineupSection = matchData.lineups ? `
-            <div class="match-lineups">
-                <h4>라인업</h4>
-                <div class="lineups-container">
-                    <div class="team-lineup">
-                        <h5>${matchData.homeTeam}</h5>
-                        ${matchData.lineups.home ? `
-                            <div class="lineup-section">
-                                <strong>1팀:</strong> ${(matchData.lineups.home.first || []).join(', ') || '없음'}
-                            </div>
-                            <div class="lineup-section">
-                                <strong>2팀:</strong> ${(matchData.lineups.home.second || []).join(', ') || '없음'}
-                            </div>
-                            <div class="lineup-section">
-                                <strong>3팀:</strong> ${(matchData.lineups.home.third || []).join(', ') || '없음'}
-                            </div>
-                        ` : '<p>라인업 정보 없음</p>'}
-                    </div>
-                    <div class="team-lineup">
-                        <h5>${matchData.awayTeam}</h5>
-                        ${matchData.lineups.away ? `
-                            <div class="lineup-section">
-                                <strong>1팀:</strong> ${(matchData.lineups.away.first || []).join(', ') || '없음'}
-                            </div>
-                            <div class="lineup-section">
-                                <strong>2팀:</strong> ${(matchData.lineups.away.second || []).join(', ') || '없음'}
-                            </div>
-                            <div class="lineup-section">
-                                <strong>3팀:</strong> ${(matchData.lineups.away.third || []).join(', ') || '없음'}
-                            </div>
-                        ` : '<p>라인업 정보 없음</p>'}
-                    </div>
-                </div>
-            </div>
-        ` : '';
-        
-        panelContent.innerHTML = `
-            <div class="match-details-content">
-                <div class="match-header">
-                    <div class="match-date-time">
-                        <strong>날짜:</strong> ${matchData.date}
-                    </div>
-                    <div class="match-league">
-                        <strong>리그:</strong> ${matchData.league || '호실축구'}
-                    </div>
-                    <div class="match-status-badge ${matchData.status || 'scheduled'}">
-                        ${statusText}
-                    </div>
-                </div>
-                
-                ${scoreSection}
-                ${lineupSection}
-                
-                <div class="match-actions">
-                    <button onclick="refreshMatchData('${matchData.id}')" class="action-btn">
-                        정보 새로고침
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-}
-
-// 경기 상태 텍스트 변환 (업데이트)
-function getMatchStatusText(status) {
-    switch (status) {
-        case 'scheduled': return '예정';
-        case 'live': return '진행중';
-        case 'finished': return '완료';  // completed -> finished로 변경
-        case 'cancelled': return '취소';
-        default: return '예정';
-    }
-}
-
-// 경기 상태 텍스트 변환
-function getMatchStatusText(status) {
-    switch (status) {
-        case 'scheduled': return '예정';
-        case 'live': return '진행중';
-        case 'completed': return '완료';
-        case 'cancelled': return '취소';
-        default: return '예정';
-    }
-}
-
-// 특정 경기 데이터 새로고침
-async function refreshMatchData(matchId) {
-    try {
-        const matchDoc = await window.firebase.getDoc(
-            window.firebase.doc(window.db, 'matches', matchId)
-        );
-        
-        if (matchDoc.exists()) {
-            const updatedMatch = { id: matchDoc.id, ...matchDoc.data() };
-            
-            // 기존 데이터 업데이트
-            const index = matchesData.findIndex(match => match.id === matchId);
-            if (index !== -1) {
-                matchesData[index] = updatedMatch;
-                
-                // 현재 표시중인 경기라면 UI 업데이트
-                if (index === currentMatchIndex) {
-                    updateMatchDisplay();
-                    loadMatchDetailsInPanel(updatedMatch);
-                }
-            }
-            
-            console.log('경기 데이터 새로고침 완료:', updatedMatch);
-        }
-    } catch (error) {
-        console.error('경기 데이터 새로고침 실패:', error);
-    }
-}
-
-// 실시간 경기 데이터 업데이트 리스너 설정
-function setupMatchDataListener() {
-    if (!window.db) return;
-    
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const matchesCollection = window.firebase.collection(window.db, 'matches');
-        const todayQuery = window.firebase.query(
-            matchesCollection,
-            window.firebase.where('date', '==', today)
-        );
-        
-        // 실시간 리스너 설정
-        window.firebase.onSnapshot(todayQuery, (snapshot) => {
-            console.log('경기 데이터 실시간 업데이트 감지');
-            
-            const updatedMatches = [];
-            snapshot.forEach((doc) => {
-                updatedMatches.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
-            });
-            
-            // 시간순 정렬
-            updatedMatches.sort((a, b) => {
-                if (!a.time || !b.time) return 0;
-                return a.time.localeCompare(b.time);
-            });
-            
-            matchesData = updatedMatches;
-            updateMatchDisplay();
-        }, (error) => {
-            console.error('실시간 리스너 오류:', error);
-        });
-    } catch (error) {
-        console.error('실시간 리스너 설정 실패:', error);
-    }
-}
 
 // ===== 모달 관리 함수들 =====
 
@@ -557,6 +148,7 @@ function openProfileEditModal(profileData) {
 // 경기 상세 패널 열기
 function openMatchPanel(matchId) {
     if (matchDetailsPanel && overlay) {
+        loadMatchDetails(matchId);
         matchDetailsPanel.classList.add('active');
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -570,6 +162,26 @@ function closeMatchPanel() {
         overlay.classList.remove('active');
         document.body.style.overflow = '';
     }
+}
+
+// 경기 상세 정보 로드 (기본 구조만)
+function loadMatchDetails(matchId) {
+    const panelContent = document.getElementById('panelContent');
+    const panelTitle = document.getElementById('panelTitle');
+    
+    if (panelTitle) {
+        panelTitle.textContent = '경기 상세 정보';
+    }
+    
+    if (panelContent) {
+        panelContent.innerHTML = `
+            <div class="loading">
+                <p>경기 정보를 불러오는 중...</p>
+            </div>
+        `;
+    }
+    
+    console.log(`경기 ID ${matchId}의 상세 정보를 로드합니다.`);
 }
 
 // ===== 인증 관련 함수들 =====
@@ -849,23 +461,278 @@ async function showUserProfile() {
             const pointsDocRef = window.firebase.doc(db, 'user_points', user.uid);
             const pointsDoc = await window.firebase.getDoc(pointsDocRef);
             profileData.points = pointsDoc.exists() ? pointsDoc.data().points || 0 : 0;
-
-            // 전역 변수에 저장
+            
             currentUserProfile = profileData;
-
-            // UI 업데이트
             updateUIForAuthState(true, profileData);
+            
+            console.log('프로필 로드 완료:', profileData);
+            
+        } catch (error) {
+            console.error('프로필 로드 실패:', error);
+            updateUIForAuthState(false);
+        }
+    } else {
+        currentUserProfile = null;
+        updateUIForAuthState(false);
+    }
+}
 
-            } catch (error) {
-                console.error('프로필 로드 실패:', error);
-                updateUIForAuthState(true, {
-                    email: user.email,
-                    nickname: user.displayName || user.email.split('@')[0],
-                    points: 0
+// UI 상태 업데이트
+function updateUIForAuthState(isLoggedIn, profileData = null) {
+    const loginBtn = document.querySelector('.login-btn');
+    const profileCard = document.querySelector('.profile-card');
+    
+    if (isLoggedIn && profileData) {
+        // 로그인 상태 - 로그인 버튼을 로그아웃 버튼으로 변경
+        if (loginBtn) {
+            loginBtn.textContent = '로그아웃';
+            loginBtn.onclick = logout;
+        }
+        
+        // 프로필 카드 업데이트
+        if (profileCard) {
+            const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.nickname || 'USER')}&background=27AE60&color=fff&size=80&bold=true`;
+            const avatarUrl = profileData.avatar_url || defaultAvatar;
+            
+            profileCard.innerHTML = `
+                <div class="profile-img" onclick="openProfileEditModal(currentUserProfile)" style="cursor: pointer; position: relative; transition: transform 0.3s ease;" title="프로필 편집하기">
+                    <img src="${avatarUrl}" alt="프로필" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;" class="edit-overlay">
+                        편집
+                    </div>
+                </div>
+                <div id="profileName">${profileData.nickname || '사용자'}</div>
+                <div class="profile-stats">
+                    <div class="points" id="userPoints">${profileData.points || 0}</div>
+                    <div>포인트 순위: <span id="pointRank">-</span></div>
+                    <div><span id="classRank">-</span>/<span id="totalRank">-</span></div>
+                </div>
+            `;
+            
+            // 프로필 이미지 호버 효과 추가
+            const profileImg = profileCard.querySelector('.profile-img');
+            const editOverlay = profileCard.querySelector('.edit-overlay');
+            
+            if (profileImg && editOverlay) {
+                profileImg.addEventListener('mouseenter', () => {
+                    profileImg.style.transform = 'scale(1.05)';
+                    editOverlay.style.opacity = '1';
+                });
+                
+                profileImg.addEventListener('mouseleave', () => {
+                    profileImg.style.transform = 'scale(1)';
+                    editOverlay.style.opacity = '0';
                 });
             }
-            } else {
-                updateUIForAuthState(false);
-            }
-            }
+        }
+        
+    } else {
+        // 로그아웃 상태
+        if (loginBtn) {
+            loginBtn.textContent = '로그인';
+            loginBtn.onclick = openLoginModal;
+        }
+        
+        // 프로필 카드 기본 상태로 복원
+        if (profileCard) {
+            profileCard.innerHTML = `
+                <div class="profile-img"></div>
+                <h4 id="profileName">게스트</h4>
+                <div class="profile-stats">
+                    <div class="points" id="userPoints">0</div>
+                    <div>포인트 순위: <span id="pointRank">-</span></div>
+                    <div><span id="classRank">-</span>/<span id="totalRank">-</span></div>
+                </div>
+            `;
+        }
+    }
+}
 
+// ===== 이벤트 리스너 설정 =====
+
+function setupEventListeners() {
+    // 모달 닫기 버튼들
+    const closeButtons = document.querySelectorAll('.auth-modal-close, .profile-edit-modal-close, .close-panel');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', closeAllModals);
+    });
+    
+    // 취소 버튼들
+    const cancelButtons = document.querySelectorAll('#cancelEditBtn');
+    cancelButtons.forEach(btn => {
+        btn.addEventListener('click', closeAllModals);
+    });
+    
+    // 패널 닫기
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeMatchPanel();
+                closeAllModals();
+            }
+        });
+    }
+    
+    // 로그인 관련
+    const doLoginBtn = document.getElementById('doLogin');
+    if (doLoginBtn) doLoginBtn.addEventListener('click', handleLogin);
+    
+    const openSignupLink = document.getElementById('openSignupLink');
+    if (openSignupLink) openSignupLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSignupModal();
+    });
+    
+    const backToLoginLink = document.getElementById('backToLoginLink');
+    if (backToLoginLink) backToLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLoginModal();
+    });
+    
+    const openPasswordResetLink = document.getElementById('openPasswordResetLink');
+    if (openPasswordResetLink) openPasswordResetLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPasswordResetModal();
+    });
+    
+    const backToLoginFromReset = document.getElementById('backToLoginFromReset');
+    if (backToLoginFromReset) backToLoginFromReset.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLoginModal();
+    });
+    
+    // 회원가입 관련
+    const openProfileModalBtn = document.getElementById('openProfileModalBtn');
+    if (openProfileModalBtn) openProfileModalBtn.addEventListener('click', handleSignupNext);
+    
+    const signupSaveProfileBtn = document.getElementById('signupSaveProfileBtn');
+    if (signupSaveProfileBtn) signupSaveProfileBtn.addEventListener('click', handleSignupComplete);
+    
+    // 비밀번호 재설정
+    const sendResetEmailBtn = document.getElementById('sendResetEmailBtn');
+    if (sendResetEmailBtn) sendResetEmailBtn.addEventListener('click', handlePasswordReset);
+    
+    // 프로필 편집 관련
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    if (saveProfileBtn) saveProfileBtn.addEventListener('click', saveProfile);
+    
+    const changeImageBtn = document.getElementById('changeImageBtn');
+    const imageFileInput = document.getElementById('imageFileInput');
+    if (changeImageBtn && imageFileInput) {
+        changeImageBtn.addEventListener('click', () => imageFileInput.click());
+    }
+    
+    // 이미지 미리보기
+    if (imageFileInput) {
+        imageFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // 파일 크기 체크 (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('파일 크기가 너무 큽니다. 5MB 이하의 이미지를 선택해주세요.');
+                    return;
+                }
+                
+                // 파일 타입 체크
+                if (!file.type.startsWith('image/')) {
+                    alert('이미지 파일만 업로드할 수 있습니다.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imagePreview = document.getElementById('imagePreview');
+                    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                    
+                    if (imagePreview && imagePreviewContainer) {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // 이미지 취소 버튼
+    const cancelImageBtn = document.getElementById('cancelImageBtn');
+    if (cancelImageBtn && imageFileInput) {
+        cancelImageBtn.addEventListener('click', () => {
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
+            imageFileInput.value = '';
+        });
+    }
+    
+    // Enter 키로 로그인/회원가입
+    const loginPassword = document.getElementById('loginPassword');
+    if (loginPassword) {
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+    }
+    
+    const signupPassword = document.getElementById('signupPassword');
+    if (signupPassword) {
+        signupPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSignupNext();
+        });
+    }
+    
+    console.log('모든 이벤트 리스너 설정 완료');
+}
+
+// ===== 인증 상태 감지 =====
+
+function setupAuthListener() {
+    window.firebase.onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            console.log('사용자 로그인됨:', user.email);
+            await showUserProfile();
+        } else {
+            console.log('사용자 로그아웃됨');
+            currentUserProfile = null;
+            updateUIForAuthState(false);
+        }
+    });
+}
+
+// ===== 초기화 =====
+
+async function initialize() {
+    console.log('auth-modals.js 초기화 시작');
+    
+    try {
+        // Firebase 초기화 대기
+        await waitForFirebaseInit();
+        
+        // 이벤트 리스너 설정
+        setupEventListeners();
+        
+        // 인증 상태 감지 시작
+        setupAuthListener();
+        
+        // 전역 함수 노출
+        window.openLoginModal = openLoginModal;
+        window.openSignupModal = openSignupModal;
+        window.openProfileModal = openProfileModal;
+        window.openPasswordResetModal = openPasswordResetModal;
+        window.openProfileEditModal = openProfileEditModal;
+        window.openMatchPanel = openMatchPanel;
+        window.closeMatchPanel = closeMatchPanel;
+        window.logout = logout;
+        window.currentUserProfile = currentUserProfile;
+        
+        console.log('auth-modals.js 초기화 완료');
+        
+    } catch (error) {
+        console.error('초기화 실패:', error);
+    }
+}
+
+// DOM 로드 완료 후 초기화
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+} else {
+    initialize();
+}
