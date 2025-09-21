@@ -1,18 +1,20 @@
 // auth-config.js - 설정, 유틸리티, 헬퍼 클래스들
 
 // 설정 및 상수
+require('dotenv').config();
+
 const CONFIG = {
-  EMAIL_DOMAIN: '@hanilgo.cnehs.kr',
-  NICKNAME_MIN_LENGTH: 2,
-  NICKNAME_MAX_LENGTH: 20,
-  AVATAR_BASE_URL: 'https://ui-avatars.com/api/',
+  EMAIL_DOMAIN: process.env.EMAIL_DOMAIN,
+  NICKNAME_MIN_LENGTH: Number(process.env.NICKNAME_MIN_LENGTH),
+  NICKNAME_MAX_LENGTH: Number(process.env.NICKNAME_MAX_LENGTH),
+  AVATAR_BASE_URL: process.env.AVATAR_BASE_URL,
   FIREBASE_CONFIG: {
-    apiKey: "AIzaSyC_YES_I20XByZpXjCN2p1Vp5gueS4Op24",
-    authDomain: "hsp-auth-22845.firebaseapp.com",
-    projectId: "hsp-auth-22845",
-    storageBucket: "hsp-auth-22845.firebasestorage.app",
-    messagingSenderId: "1034282361573",
-    appId: "1:1034282361573:web:a15b970a18ae7033552a0c"
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID
   }
 };
 
