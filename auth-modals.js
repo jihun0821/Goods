@@ -297,26 +297,66 @@ function loadMatchDetailsInPanel(matchData) {
     const panelTitle = document.getElementById('panelTitle');
     
     if (panelTitle) {
-        panelTitle.textContent = `${matchData.home_team} VS ${matchData.away_team}`;
+        panelTitle.textContent = `${matchData.homeTeam} VS ${matchData.awayTeam}`;
     }
     
     if (panelContent) {
         const statusText = getMatchStatusText(matchData.status);
-        const scoreSection = matchData.status === 'completed' ? 
+        const scoreSection = matchData.status === 'finished' ? 
             `<div class="match-final-score">
                 <h3>최종 스코어</h3>
                 <div class="score-display">
-                    <span class="team-score">${matchData.home_team} ${matchData.home_score || 0}</span>
+                    <span class="team-score">${matchData.homeTeam} ${matchData.homeScore || 0}</span>
                     <span class="score-separator">:</span>
-                    <span class="team-score">${matchData.away_score || 0} ${matchData.away_team}</span>
+                    <span class="team-score">${matchData.awayScore || 0} ${matchData.awayTeam}</span>
                 </div>
             </div>` : '';
+
+        // 라인업 섹션 (lineups가 있는 경우)
+        const lineupSection = matchData.lineups ? `
+            <div class="match-lineups">
+                <h4>라인업</h4>
+                <div class="lineups-container">
+                    <div class="team-lineup">
+                        <h5>${matchData.homeTeam}</h5>
+                        ${matchData.lineups.home ? `
+                            <div class="lineup-section">
+                                <strong>1팀:</strong> ${(matchData.lineups.home.first || []).join(', ') || '없음'}
+                            </div>
+                            <div class="lineup-section">
+                                <strong>2팀:</strong> ${(matchData.lineups.home.second || []).join(', ') || '없음'}
+                            </div>
+                            <div class="lineup-section">
+                                <strong>3팀:</strong> ${(matchData.lineups.home.third || []).join(', ') || '없음'}
+                            </div>
+                        ` : '<p>라인업 정보 없음</p>'}
+                    </div>
+                    <div class="team-lineup">
+                        <h5>${matchData.awayTeam}</h5>
+                        ${matchData.lineups.away ? `
+                            <div class="lineup-section">
+                                <strong>1팀:</strong> ${(matchData.lineups.away.first || []).join(', ') || '없음'}
+                            </div>
+                            <div class="lineup-section">
+                                <strong>2팀:</strong> ${(matchData.lineups.away.second || []).join(', ') || '없음'}
+                            </div>
+                            <div class="lineup-section">
+                                <strong>3팀:</strong> ${(matchData.lineups.away.third || []).join(', ') || '없음'}
+                            </div>
+                        ` : '<p>라인업 정보 없음</p>'}
+                    </div>
+                </div>
+            </div>
+        ` : '';
         
         panelContent.innerHTML = `
             <div class="match-details-content">
                 <div class="match-header">
                     <div class="match-date-time">
-                        <strong>날짜:</strong> ${matchData.date} ${matchData.time || ''}
+                        <strong>날짜:</strong> ${matchData.date}
+                    </div>
+                    <div class="match-league">
+                        <strong>리그:</strong> ${matchData.league || '호실축구'}
                     </div>
                     <div class="match-status-badge ${matchData.status || 'scheduled'}">
                         ${statusText}
@@ -324,23 +364,7 @@ function loadMatchDetailsInPanel(matchData) {
                 </div>
                 
                 ${scoreSection}
-                
-                <div class="match-info-grid">
-                    <div class="info-item">
-                        <strong>경기장:</strong> ${matchData.venue || '미정'}
-                    </div>
-                    <div class="info-item">
-                        <strong>조:</strong> ${matchData.group || '미정'}
-                    </div>
-                    ${matchData.referee ? `<div class="info-item"><strong>심판:</strong> ${matchData.referee}</div>` : ''}
-                </div>
-                
-                ${matchData.description ? `
-                    <div class="match-description">
-                        <h4>경기 정보</h4>
-                        <p>${matchData.description}</p>
-                    </div>
-                ` : ''}
+                ${lineupSection}
                 
                 <div class="match-actions">
                     <button onclick="refreshMatchData('${matchData.id}')" class="action-btn">
@@ -349,6 +373,17 @@ function loadMatchDetailsInPanel(matchData) {
                 </div>
             </div>
         `;
+    }
+}
+
+// 경기 상태 텍스트 변환 (업데이트)
+function getMatchStatusText(status) {
+    switch (status) {
+        case 'scheduled': return '예정';
+        case 'live': return '진행중';
+        case 'finished': return '완료';  // completed -> finished로 변경
+        case 'cancelled': return '취소';
+        default: return '예정';
     }
 }
 
