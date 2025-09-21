@@ -1,0 +1,392 @@
+/* 오늘의 경기 섹션 */
+.today-match-section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
+    max-width: 800px;
+    width: 100%;
+    height: 300px;
+}
+
+.match-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.nav-btn {
+    background: #27AE60;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: #32CD32;
+    transform: scale(1.1);
+}
+
+.match-info {
+    background: #ffffff;
+    border: 2px solid #27AE60;
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    min-width: 300px;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.1);
+}
+
+.match-date {
+    font-size: 0.9rem;
+    color: #757575;
+    margin-bottom: 0.5rem;
+}
+
+.match-teams {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #212121;
+}
+
+/* 프로필 카드 */
+.profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
+    text-align: center;
+    width: 500px;
+}
+
+.profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    background: linear-gradient(45deg, #27AE60, #32CD32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2);
+}
+
+#profileName {
+    color: #212121;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.profile-stats {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #757575;
+}
+
+.points {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #27AE60;
+    margin-bottom: 0.5rem;
+}
+
+/* 네비게이션 링크들 */
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    height: 60px;
+}
+
+.nav-link {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem;
+    text-decoration: none;
+    color: #333333;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
+    text-align: center;
+    flex: 1;
+    min-width: 120px;
+}
+
+.nav-link:hover {
+    background: #27AE60;
+    color: white;
+    transform: translateY(-2px);
+    border-color: #27AE60;
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+}
+
+/* 네비게이션 링크 내 이미지들 공통 스타일 */
+.nav-link img {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+    object-fit: contain;
+}
+
+/* 개별 이미지 클래스별 스타일 */
+.caffe-img {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+}
+
+.hanilian-img {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+}
+
+.playground-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+}
+
+.hanilpoint-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+/* 호버 효과 */
+.nav-link:hover img {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+/* 하단 섹션들 */
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* 조별 순위표 */
+.groups-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.group-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
+    transition: transform 0.3s ease;
+}
+
+.group-card:hover {
+    transform: translateY(-2px);
+    border-color: #27AE60;
+}
+
+.group-title {
+    text-align: center;
+    color: #212121;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    background: #27AE60;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.team-list {
+    list-style: none;
+}
+
+.team-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem;
+    border-radius: 8px;
+    margin-bottom: 0.3rem;
+    background: #f8f8f8;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.team-item:hover {
+    background: #f0f0f0;
+    border-left-color: #27AE60;
+}
+
+.team-item:first-child {
+    background: rgba(39, 174, 96, 0.1);
+    border-left-color: #27AE60;
+}
+
+.team-rank {
+    font-weight: bold;
+    color: #27AE60;
+    width: 20px;
+}
+
+.team-name {
+    flex: 1;
+    margin-left: 0.5rem;
+    color: #333333;
+    font-weight: 500;
+}
+
+.team-points {
+    font-weight: bold;
+    color: #212121;
+}
+
+/* 사이드 리스트들 */
+.side-lists {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    height: 270px;
+}
+
+.list-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
+    height: 270px;
+    transition: transform 0.3s ease;
+}
+
+.list-card:hover {
+    transform: translateY(-2px);
+    border-color: #27AE60;
+}
+
+.list-title {
+    color: #212121;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1rem;
+    background: #27AE60;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin: -0.5rem -0.5rem 1rem -0.5rem;
+}
+
+.list-items {
+    list-style: none;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 0.1rem;
+    background: #f8f8f8;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    color: #333333;
+    border-left: 3px solid transparent;
+}
+
+.list-item:hover {
+    background: #f0f0f0;
+    border-left-color: #27AE60;
+}
+
+.list-item:first-child {
+    background: rgba(39, 174, 96, 0.1);
+    border-left-color: #27AE60;
+    font-weight: 600;
+}
+
+/* 반응형 디자인 - 컴포넌트별 */
+@media (max-width: 1200px) {
+    .groups-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .side-lists {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-link img {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+    }
+    
+    .caffe-img {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .hanilian-img {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .playground-img {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .hanilpoint-img {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .groups-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .side-lists {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    
+    .list-card {
+        height: auto;
+        min-height: 200px;
+    }
+    
+    .profile-card {
+        width: 100%;
+    }
+}
