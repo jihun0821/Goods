@@ -1,0 +1,314 @@
+/* matches.css - 경기 관련 스타일 */
+
+/* 오늘의 경기 섹션 */
+.today-match-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+/* 경기 표시 컨테이너 */
+.match-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(39, 174, 96, 0.1);
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.match-display:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(39, 174, 96, 0.15);
+    border-color: #27AE60;
+}
+
+/* 네비게이션 버튼 */
+.nav-btn {
+    background: linear-gradient(45deg, #27AE60, #32CD32);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.nav-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 경기 정보 */
+.match-info {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    padding: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.match-info:hover {
+    background: rgba(39, 174, 96, 0.05);
+}
+
+.match-date {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.match-teams {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.match-score {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #27AE60;
+    margin-bottom: 0.5rem;
+}
+
+.match-status {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: inline-block;
+    font-weight: 600;
+    background: linear-gradient(45deg, #27AE60, #32CD32);
+    color: white;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* 경기 없음 메시지 */
+.no-matches {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 16px;
+    color: #666;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 2px dashed #e0e0e0;
+}
+
+.no-matches::before {
+    content: "📅";
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+/* 네비게이션 링크들 */
+.nav-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 16px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(39, 174, 96, 0.15);
+    border-color: #27AE60;
+    color: #27AE60;
+}
+
+/* 네비게이션 링크 이미지 */
+.caffe-img, .hanilian-img, .playground-img, .hanilpoint-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.nav-link:hover .caffe-img,
+.nav-link:hover .hanilian-img,
+.nav-link:hover .playground-img,
+.nav-link:hover .hanilpoint-img {
+    transform: scale(1.1);
+}
+
+/* 조별 순위표 컨테이너 */
+.groups-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.group-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.group-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(39, 174, 96, 0.15);
+    border-color: #27AE60;
+}
+
+.group-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #27AE60;
+    margin-bottom: 1rem;
+    text-align: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #27AE60;
+}
+
+.team-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.team-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.team-item:last-child {
+    border-bottom: none;
+}
+
+.team-item:hover {
+    background: rgba(39, 174, 96, 0.05);
+    border-radius: 8px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.team-rank {
+    font-weight: bold;
+    color: #27AE60;
+    background: rgba(39, 174, 96, 0.1);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.team-name {
+    flex: 1;
+    margin-left: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.team-points {
+    font-weight: bold;
+    color: #27AE60;
+    background: rgba(39, 174, 96, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .match-display {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .match-teams {
+        font-size: 1.5rem;
+    }
+    
+    .nav-links {
+        grid-template-columns: 1fr;
+    }
+    
+    .groups-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .today-match-section {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-display {
+        padding: 1rem;
+    }
+    
+    .match-teams {
+        font-size: 1.3rem;
+    }
+    
+    .match-score {
+        font-size: 1.3rem;
+    }
+    
+    .nav-link {
+        padding: 1.2rem;
+        font-size: 1rem;
+    }
+    
+    .group-card {
+        padding: 1.2rem;
+    }
+}
