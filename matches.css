@@ -7,6 +7,9 @@
     padding: 2rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
+    position: relative;        /* 내부 요소 위치 기준 */
+    overflow: visible;         /* 넘치는 요소 보이도록 */
+    height: auto;              /* 고정 높이 제거 (내용에 따라 자동) */
 }
 
 /* 경기 표시 컨테이너 */
@@ -21,6 +24,13 @@
     box-shadow: 0 4px 20px rgba(39, 174, 96, 0.1);
     border: 2px solid #f0f0f0;
     transition: all 0.3s ease;
+    position: static;      /* position 관련 속성 제거 */
+    margin: 0;             /* 불필요한 margin 제거 */
+    width: 100%;           /* 부모에 맞게 늘어나도록 */
+    max-width: 600px;      /* 너무 커지지 않게 제한 */
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 1;            /* 기본값 */
 }
 
 .match-display:hover {
@@ -259,12 +269,24 @@
     font-size: 0.9rem;
 }
 
+/* 네비게이션 링크와 오늘의 경기 사이 충분한 간격 */
+.today-match-section + .nav-links {
+    margin-top: 2rem;
+}
+
+/* .today-match-section 내부 모든 요소가 침범하지 않게 */
+.today-match-section > * {
+    position: static;
+    z-index: auto;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .match-display {
         flex-direction: column;
         gap: 1rem;
-        padding: 1.5rem;
+        padding: 1.2rem;
+        max-width: 95vw;
     }
     
     .nav-btn {
@@ -286,7 +308,7 @@
     }
     
     .today-match-section {
-        padding: 1.5rem;
+        padding: 1.2rem;
     }
 }
 
