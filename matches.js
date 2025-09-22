@@ -4,9 +4,6 @@
 let todayMatches = [];
 let currentMatchIndex = 0;
 
-// Firebase 변수들 (script.js에서 초기화됨)
-let db, auth;
-
 // 오늘 날짜 포맷팅 함수 (YYYY-MM-DD 형태)
 function getTodayDateString() {
     const today = new Date();
