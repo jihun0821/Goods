@@ -1,0 +1,345 @@
+/* matches.css - 경기 관련 스타일 (Firebase 구조에 맞춤) */
+
+/* 경기 상태별 스타일 */
+.match-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: #f8f9fa;
+    color: #495057;
+    display: inline-block;
+    min-width: 50px;
+    text-align: center;
+}
+
+.match-status.live {
+    background-color: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.match-status.finished {
+    background-color: #28a745;
+    color: white;
+}
+
+.match-status.cancelled {
+    background-color: #6c757d;
+    color: white;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 경기 정보 클릭 가능 표시 */
+.match-info:hover {
+    background-color: rgba(39, 174, 96, 0.05);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+/* 네비게이션 버튼 스타일 개선 */
+.nav-btn {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background-color: #27AE60;
+    color: white;
+    border-color: #27AE60;
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 경기 점수 스타일 */
+.match-score {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #27AE60;
+    margin: 8px 0;
+}
+
+/* 경기 없음 메시지 스타일 개선 */
+.no-matches {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin: 0 20px;
+}
+
+/* 로딩 상태 스타일 */
+.match-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+.match-loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #27AE60;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 경기 상세 패널 스타일 */
+.match-details {
+    padding: 20px;
+}
+
+.match-header {
+    text-align: center;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 16px;
+}
+
+.match-header h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.match-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.match-meta span {
+    padding: 4px 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.match-status-section {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.status-badge.scheduled {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.status-badge.live {
+    background-color: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.status-badge.finished {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-badge.cancelled {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* 점수 섹션 */
+.score-section {
+    margin: 24px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.final-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.team-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+}
+
+.team-score .team-name {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.team-score .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #27AE60;
+}
+
+.vs {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #999;
+}
+
+/* 라인업 섹션 */
+.lineups-section {
+    margin-top: 32px;
+}
+
+.lineups-section h4 {
+    margin: 0 0 16px 0;
+    font-size: 1.2rem;
+    color: #333;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+.lineups-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.team-lineup {
+    background-color: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.team-lineup h5 {
+    margin: 0 0 12px 0;
+    font-size: 1.1rem;
+    color: #27AE60;
+    text-align: center;
+    font-weight: 600;
+}
+
+.lineup-period {
+    margin-bottom: 16px;
+}
+
+.lineup-period:last-child {
+    margin-bottom: 0;
+}
+
+.lineup-period h6 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.lineup-period ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lineup-period li {
+    padding: 4px 8px;
+    margin: 2px 0;
+    background-color: white;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+/* 에러 메시지 */
+.error-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #dc3545;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .match-info {
+        padding: 12px;
+    }
+    
+    .match-date {
+        font-size: 0.85rem;
+    }
+    
+    .match-teams {
+        font-size: 1rem;
+    }
+    
+    .match-score {
+        font-size: 1.1rem;
+    }
+    
+    .match-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .final-score {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .vs {
+        transform: rotate(90deg);
+        font-size: 1.5rem;
+    }
+    
+    .lineups-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .team-score .score {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-details {
+        padding: 16px;
+    }
+    
+    .match-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .team-score .score {
+        font-size: 1.8rem;
+    }
+}
