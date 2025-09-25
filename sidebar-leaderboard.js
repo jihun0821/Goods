@@ -1,4 +1,4 @@
-// sidebar-leaderboard.js - 사이드바 포인트 순위 업데이트 (페이지네이션 추가)
+// sidebar-leaderboard.js - 사이드바 포인트 순위 업데이트 (1~10등만 표시, 5명씩 페이지네이션)
 let sidebarLeaderboardData = [];
 let currentPage = 0;
 let totalPages = 0;
@@ -99,8 +99,8 @@ async function loadSidebarLeaderboard() {
             userStats[uid].totalVotes = userStats[uid].participatedMatches.size;
         });
         
-        // 5. 사이드바 리더보드 데이터 생성
-        sidebarLeaderboardData = Object.keys(userProfiles)
+        // 5. 사이드바 리더보드 데이터 생성 및 정렬
+        const allUsers = Object.keys(userProfiles)
             .map(uid => {
                 const profile = userProfiles[uid];
                 const stats = userStats[uid];
@@ -131,11 +131,14 @@ async function loadSidebarLeaderboard() {
                 return b.totalVotes - a.totalVotes;
             });
         
-        // 총 페이지 수 계산 (한 페이지당 5명)
+        // ★ 1~10등까지만 선택 (최대 10명)
+        sidebarLeaderboardData = allUsers.slice(0, 10);
+        
+        // 총 페이지 수 계산 (한 페이지당 5명, 최대 2페이지)
         totalPages = Math.ceil(sidebarLeaderboardData.length / 5);
         currentPage = 0;
         
-        console.log("사이드바 리더보드 데이터 로드 완료:", sidebarLeaderboardData.length, "명, 총", totalPages, "페이지");
+        console.log("사이드바 리더보드 데이터 로드 완료:", sidebarLeaderboardData.length, "명 (1~10등), 총", totalPages, "페이지");
         
         // 사이드바 리더보드 렌더링 시작
         renderSidebarLeaderboard();
@@ -169,7 +172,7 @@ function renderSidebarLeaderboard() {
         listItems.innerHTML = '';
         
         pageUsers.forEach((user, index) => {
-            const rank = startIndex + index + 1;
+            const rank = startIndex + index + 1; // 실제 순위 (1등~10등)
             const listItem = document.createElement('li');
             listItem.className = 'list-item';
             
@@ -246,7 +249,7 @@ function startAutoSwitch() {
         clearInterval(autoSwitchInterval);
     }
     
-    // 페이지가 2개 이상일 때만 자동 전환
+    // 페이지가 2개 이상일 때만 자동 전환 (즉, 사용자가 6명 이상일 때)
     if (totalPages > 1) {
         autoSwitchInterval = setInterval(() => {
             currentPage = (currentPage + 1) % totalPages;
