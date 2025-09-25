@@ -1,5 +1,8 @@
-// sidebar-leaderboard.js - 사이드바 포인트 순위 업데이트
+// sidebar-leaderboard.js - 사이드바 포인트 순위 업데이트 (페이지네이션 추가)
 let sidebarLeaderboardData = [];
+let currentPage = 0;
+let totalPages = 0;
+let autoSwitchInterval;
 
 // Firebase 초기화 대기
 window.addEventListener('DOMContentLoaded', () => {
@@ -128,10 +131,15 @@ async function loadSidebarLeaderboard() {
                 return b.totalVotes - a.totalVotes;
             });
         
-        console.log("사이드바 리더보드 데이터 로드 완료:", sidebarLeaderboardData.length, "명");
+        // 총 페이지 수 계산 (한 페이지당 5명)
+        totalPages = Math.ceil(sidebarLeaderboardData.length / 5);
+        currentPage = 0;
         
-        // 사이드바 리더보드 렌더링
+        console.log("사이드바 리더보드 데이터 로드 완료:", sidebarLeaderboardData.length, "명, 총", totalPages, "페이지");
+        
+        // 사이드바 리더보드 렌더링 시작
         renderSidebarLeaderboard();
+        startAutoSwitch();
         
     } catch (error) {
         console.error("사이드바 리더보드 로드 실패:", error);
@@ -140,39 +148,119 @@ async function loadSidebarLeaderboard() {
     }
 }
 
-// 사이드바 리더보드 렌더링 (상위 5명만)
+// 사이드바 리더보드 렌더링 (현재 페이지)
 function renderSidebarLeaderboard() {
     const listItems = document.querySelector('.list-card .list-items');
-    if (!listItems) return;
-    
-    // 상위 5명만 선택
-    const topUsers = sidebarLeaderboardData.slice(0, 5);
-    
-    if (topUsers.length === 0) {
+    if (!listItems || sidebarLeaderboardData.length === 0) {
         renderEmptySidebarLeaderboard();
         return;
     }
     
-    // 기존 내용 제거
-    listItems.innerHTML = '';
+    // 현재 페이지에 해당하는 사용자들 선택 (5명씩)
+    const startIndex = currentPage * 5;
+    const endIndex = Math.min(startIndex + 5, sidebarLeaderboardData.length);
+    const pageUsers = sidebarLeaderboardData.slice(startIndex, endIndex);
     
-    topUsers.forEach((user, index) => {
-        const rank = index + 1;
-        const listItem = document.createElement('li');
-        listItem.className = 'list-item';
+    // 애니메이션을 위해 기존 내용에 fade-out 클래스 추가
+    listItems.classList.add('fade-out');
+    
+    setTimeout(() => {
+        // 기존 내용 제거
+        listItems.innerHTML = '';
         
-        // 상위 3위에 특별 클래스 추가 (옵션)
-        if (rank <= 3) {
-            listItem.classList.add('top-rank');
+        pageUsers.forEach((user, index) => {
+            const rank = startIndex + index + 1;
+            const listItem = document.createElement('li');
+            listItem.className = 'list-item';
+            
+            // 상위 3위에 특별 클래스 추가
+            if (rank <= 3) {
+                listItem.classList.add('top-rank');
+            }
+            
+            listItem.innerHTML = `
+                <span>${rank}. ${escapeHtml(user.nickname)}</span>
+                <span>${user.points}P</span>
+            `;
+            
+            listItems.appendChild(listItem);
+        });
+        
+        // 빈 슬롯 채우기 (항상 5개 항목 유지)
+        for (let i = pageUsers.length; i < 5; i++) {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-item empty-slot';
+            listItem.innerHTML = `
+                <span style="color: #ccc;">-</span>
+                <span style="color: #ccc;">-</span>
+            `;
+            listItems.appendChild(listItem);
         }
         
-        listItem.innerHTML = `
-            <span>${rank}. ${escapeHtml(user.nickname)}</span>
-            <span>${user.points}P</span>
-        `;
+        // 페이지 인디케이터 업데이트
+        updatePageIndicator();
         
-        listItems.appendChild(listItem);
-    });
+        // fade-out 클래스 제거하고 fade-in 효과 적용
+        listItems.classList.remove('fade-out');
+        listItems.classList.add('fade-in');
+        
+        setTimeout(() => {
+            listItems.classList.remove('fade-in');
+        }, 300);
+    }, 150);
+}
+
+// 페이지 인디케이터 업데이트
+function updatePageIndicator() {
+    const listCard = document.querySelector('.list-card');
+    let indicator = listCard.querySelector('.page-indicator');
+    
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'page-indicator';
+        listCard.appendChild(indicator);
+    }
+    
+    if (totalPages <= 1) {
+        indicator.style.display = 'none';
+        return;
+    }
+    
+    indicator.style.display = 'flex';
+    indicator.innerHTML = '';
+    
+    for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'page-dot';
+        if (i === currentPage) {
+            dot.classList.add('active');
+        }
+        indicator.appendChild(dot);
+    }
+}
+
+// 자동 페이지 전환 시작
+function startAutoSwitch() {
+    // 기존 인터벌 정리
+    if (autoSwitchInterval) {
+        clearInterval(autoSwitchInterval);
+    }
+    
+    // 페이지가 2개 이상일 때만 자동 전환
+    if (totalPages > 1) {
+        autoSwitchInterval = setInterval(() => {
+            currentPage = (currentPage + 1) % totalPages;
+            renderSidebarLeaderboard();
+        }, 5000); // 5초마다 전환
+    }
+}
+
+// 자동 페이지 전환 중지
+function stopAutoSwitch() {
+    if (autoSwitchInterval) {
+        clearInterval(autoSwitchInterval);
+        autoSwitchInterval = null;
+    }
 }
 
 // 데이터가 없거나 에러 시 빈 상태 렌더링
@@ -186,6 +274,12 @@ function renderEmptySidebarLeaderboard() {
             <span>-</span>
         </li>
     `;
+    
+    // 페이지 인디케이터 숨기기
+    const indicator = document.querySelector('.page-indicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
 }
 
 // HTML 이스케이프 함수
@@ -199,6 +293,7 @@ function escapeHtml(text) {
 // 사이드바 리더보드 새로고침 함수
 function refreshSidebarLeaderboard() {
     console.log("사이드바 리더보드 새로고침 요청");
+    stopAutoSwitch();
     loadSidebarLeaderboard();
 }
 
@@ -210,3 +305,8 @@ setInterval(() => {
     console.log("자동 사이드바 리더보드 새로고침");
     loadSidebarLeaderboard();
 }, 5 * 60 * 1000); // 5분
+
+// 페이지 언로드 시 인터벌 정리
+window.addEventListener('beforeunload', () => {
+    stopAutoSwitch();
+});
