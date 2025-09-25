@@ -181,9 +181,15 @@ function renderSidebarLeaderboard() {
                 listItem.classList.add('top-rank');
             }
             
+            // 왕관 이모지 추가 (1~3위)
+            let crownIcon = '';
+            if (rank === 1) crownIcon = '👑 ';
+            else if (rank === 2) crownIcon = '🥈 ';
+            else if (rank === 3) crownIcon = '🥉 ';
+            
             listItem.innerHTML = `
-                <span>${rank}. ${escapeHtml(user.nickname)}</span>
-                <span>${user.points}P</span>
+                <span>${crownIcon}${rank}. ${escapeHtml(user.nickname)}</span>
+                <span class="points-value">${user.points}P</span>
             `;
             
             listItems.appendChild(listItem);
@@ -209,8 +215,8 @@ function renderSidebarLeaderboard() {
         
         setTimeout(() => {
             listItems.classList.remove('fade-in');
-        }, 300);
-    }, 150);
+        }, 400);
+    }, 200);
 }
 
 // 페이지 인디케이터 업데이트
