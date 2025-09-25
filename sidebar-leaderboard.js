@@ -1,7 +1,7 @@
 // sidebar-leaderboard.js - 사이드바 포인트 순위 업데이트 (페이지네이션 추가)
 let sidebarLeaderboardData = [];
 let currentPage = 0;
-let totalPages = 0;
+let totalPages = 1;
 let autoSwitchInterval;
 
 // Firebase 초기화 대기
