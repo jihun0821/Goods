@@ -353,16 +353,19 @@
         </div>
     </div>
 
+    <!-- 오버레이 -->
+    <div id="overlay"></div>
+
     <!-- 경기 상세 패널 -->
-    <div class="match-details-panel" id="matchDetailsPanel">
+    <div id="matchDetailsPanel">
         <div class="panel-header">
-            <button class="close-panel" id="closePanelBtn">×</button>
-            <h2 id="panelTitle">경기 상세 정보</h2>
+            <h2 id="panelTitle">경기 상세</h2>
+            <button id="closePanelBtn" type="button">&times;</button>
         </div>
-        <div class="panel-content" id="panelContent">
+        <div id="panelContent">
+            <!-- 패널 내용이 여기에 동적으로 삽입됩니다 -->
         </div>
     </div>
-    <div class="overlay" id="overlay"></div>
 
     <!-- 로그인 모달 -->
     <div id="loginModal" class="auth-modal" style="display: none;">
