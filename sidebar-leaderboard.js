@@ -260,7 +260,7 @@ function startAutoSwitch() {
         autoSwitchInterval = setInterval(() => {
             currentPage = (currentPage + 1) % totalPages;
             renderSidebarLeaderboard();
-        }, 5000); // 5초마다 전환
+        }, 10000); // 5초마다 전환
     }
 }
 
