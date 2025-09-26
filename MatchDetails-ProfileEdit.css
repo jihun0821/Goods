@@ -2,7 +2,7 @@
 .match-details-panel {
     position: fixed;
     top: 0;
-    right: -500px;
+    right: -600px;
     width: 600px;
     height: 100vh;
     background: #ffffff;
