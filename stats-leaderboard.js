@@ -12,8 +12,8 @@ let statsLeaderboardData = {
         { rank: 1, name: "정성훈", value: 6, unit: "어시" },
         { rank: 2, name: "김한솔", value: 5, unit: "어시" },
         { rank: 3, name: "금담인", value: 4, unit: "어시" },
-        { rank: 3, name: "정관호", value: 4, unit: "어시" },
-        { rank: 3, name: "최동명", value: 4, unit: "어시" }
+        { rank: 4, name: "정관호", value: 4, unit: "어시" },
+        { rank: 5, name: "최동명", value: 4, unit: "어시" }
     ]
 };
 
