@@ -177,4 +177,33 @@ function switchToStatsType(type) {
     }
 }
 
+// 페이지 인디케이터 업데이트
+function updatePageIndicator() {
+    const listCard = document.querySelector('.list-card');
+    let indicator = listCard.querySelector('.page-indicator');
+    
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'page-indicator';
+        listCard.appendChild(indicator);
+    }
+    
+    if (totalPages <= 1) {
+        indicator.style.display = 'none';
+        return;
+    }
+    
+    indicator.style.display = 'flex';
+    indicator.innerHTML = '';
+    
+    for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'page-dot';
+        if (i === currentPage) {
+            dot.classList.add('active'); // 현재 페이지는 초록색
+        }
+        indicator.appendChild(dot);
+    }
+}
+
 window.switchToStatsType = switchToStatsType;
