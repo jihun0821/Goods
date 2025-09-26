@@ -163,7 +163,7 @@ function startStatsAutoSwitch() {
         
         // 순위 렌더링
         renderStatsLeaderboard();
-    }, 5000); // 5초마다 전환
+    }, 10000); // 5초마다 전환
 }
 
 // 자동 전환 중지
