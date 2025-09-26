@@ -1,47 +1,46 @@
 /* 경기 상세 패널 전용 스타일 */
 
-/* 탭 컨테이너 */
+/* ====== 탭 컨테이너 (base.css 스타일 통일) ====== */
 .tab-container {
-    margin-top: 2rem;
+    margin-top: 28px;
 }
 
 .tabs {
     display: flex;
-    gap: 0;
-    margin-bottom: 1.5rem;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    background: #ffffff;
+    gap: 10px;
+    border-bottom: 2px solid #444;
+    margin-bottom: 20px;
+}
+
+body.light-mode .tabs { 
+    border-bottom: 2px solid #b8d1fa; 
 }
 
 .tab {
-    flex: 1;
-    padding: 12px 20px;
-    background: #f8f8f8;
-    color: #757575;
-    font-weight: 600;
-    text-align: center;
+    padding: 10px 24px;
     cursor: pointer;
+    font-weight: bold;
+    color: #a8b8d8;
+    border-radius: 10px 10px 0 0;
+    background: none;
     border: none;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    border-right: 1px solid #e0e0e0;
-}
-
-.tab:last-child {
-    border-right: none;
+    transition: background 0.18s, color 0.18s;
 }
 
 .tab.active {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    color: white;
-    box-shadow: 0 2px 10px rgba(39, 174, 96, 0.3);
+    color: #2051ff;
+    background: #232a3c;
+    border-bottom: 2px solid #2051ff;
 }
 
-.tab:not(.active):hover {
-    background: #e8e8e8;
-    color: #333333;
+body.light-mode .tab { 
+    color: #2051ff99; 
+}
+
+body.light-mode .tab.active {
+    color: #2051ff;
+    background: #f1f6ff;
+    border-bottom: 2px solid #2051ff;
 }
 
 .tab-contents {
@@ -49,124 +48,154 @@
 }
 
 .tab-content {
+    padding: 22px 0 0 0;
     display: none;
+    animation: fadeInTab 0.5s;
 }
 
 .tab-content.active {
     display: block;
-    animation: fadeInUp 0.4s ease-out;
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+@keyframes fadeInTab {
+    from { 
+        opacity: 0; 
+        transform: translateY(16px);
     }
-    to {
-        opacity: 1;
+    to { 
+        opacity: 1; 
         transform: translateY(0);
     }
 }
 
-/* 승부예측 스타일 */
+/* ====== 승부예측 스타일 (features.css 통일) ====== */
 .prediction-container {
     margin: 2rem 0;
 }
 
 .prediction-container h3 {
-    color: #212121;
+    color: #007bff;
     font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 1.5rem;
     text-align: center;
-    border-bottom: 2px solid #27AE60;
+    border-bottom: 2px solid #007bff;
     padding-bottom: 0.5rem;
+}
+
+body.light-mode .prediction-container h3 {
+    color: #007bff;
 }
 
 .prediction-btns {
     display: flex;
-    gap: 1rem;
     justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
     margin-bottom: 2rem;
 }
 
 .prediction-btn {
-    width: 80px;
-    height: 60px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #333333;
-    font-size: 1.5rem;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    position: relative;
+    transition: all 0.2s ease-in-out;
+    color: #111;
+    min-width: 80px;
+    text-align: center;
+    width: 80px;
+    height: 60px;
+}
+
+.prediction-btn.home-win {
+    background-color: #4CAF50;
+}
+
+.prediction-btn.draw {
+    background-color: #B0B0B0;
+}
+
+.prediction-btn.away-win {
+    background-color: #5C6BC0;
+}
+
+body.light-mode .prediction-btn {
+    color: white;
+}
+
+body.light-mode .prediction-btn.home-win {
+    background-color: #66bb6a;
+}
+
+body.light-mode .prediction-btn.draw {
+    background-color: #bdbdbd;
+}
+
+body.light-mode .prediction-btn.away-win {
+    background-color: #7986cb;
 }
 
 .prediction-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    border-color: #27AE60;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.prediction-btn.home-win:hover {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    color: white;
-    border-color: #27AE60;
+.prediction-btn.selected {
+    opacity: 0.7;
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.prediction-btn.draw:hover {
-    background: linear-gradient(135deg, #FFA500, #FFD700);
-    color: white;
-    border-color: #FFA500;
-}
-
-.prediction-btn.away-win:hover {
-    background: linear-gradient(135deg, #E74C3C, #FF6B6B);
-    color: white;
-    border-color: #E74C3C;
-}
-
-/* 관리자 결과 설정 버튼 */
+/* ====== 관리자 결과 설정 버튼 (modal.css 스타일 통일) ====== */
 .admin-result-btns {
     display: flex;
-    gap: 1rem;
+    gap: 10px;
     justify-content: center;
+    margin: 15px 0;
     margin-bottom: 2rem;
 }
 
 .admin-result-btn {
-    padding: 12px 20px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 12px;
-    font-weight: 600;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    color: white;
+    min-width: 80px;
 }
 
 .admin-result-btn.home-win {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
 }
 
 .admin-result-btn.draw {
-    background: linear-gradient(135deg, #FFA500, #FFD700);
+    background: linear-gradient(135deg, #FF9800, #f57c00);
+    color: white;
 }
 
 .admin-result-btn.away-win {
-    background: linear-gradient(135deg, #E74C3C, #FF6B6B);
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
 }
 
 .admin-result-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* 투표 통계 그래프 */
+.admin-result-btn:active {
+    transform: translateY(0);
+}
+
+/* ====== 투표 통계 그래프 (features.css 통일) ====== */
 .voting-stats {
+    margin: 15px 0;
     background: #ffffff;
     border-radius: 12px;
     padding: 1.5rem;
@@ -174,56 +203,102 @@
     border: 2px solid #f0f0f0;
 }
 
-.stat-row {
+body.light-mode .voting-stats {
+    background: #ffffff;
+    border-color: #e1e5e9;
+}
+
+body:not(.light-mode) .voting-stats {
+    background: #272424;
+    border-color: #404040;
+}
+
+.voting-stats .stat-row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
 }
 
-.stat-value {
-    font-weight: bold;
-    color: #212121;
-    min-width: 50px;
-    text-align: center;
-}
-
-.stat-bar {
+.voting-stats .stat-bar {
     flex: 1;
-    height: 20px;
-    background: #e0e0e0;
-    border-radius: 10px;
-    overflow: hidden;
+    height: 24px;
+    margin: 0 15px;
     display: flex;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #e0e0e0;
 }
 
-.home-stat {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    transition: width 0.5s ease;
+body:not(.light-mode) .voting-stats .stat-bar {
+    background-color: #222;
 }
 
-.draw-stat {
-    background: linear-gradient(135deg, #FFA500, #FFD700);
-    transition: width 0.5s ease;
+.voting-stats .home-stat {
+    background-color: #4CAF50;
+    height: 100%;
+    transition: width 0.8s ease-in-out;
 }
 
-.away-stat {
-    background: linear-gradient(135deg, #E74C3C, #FF6B6B);
-    transition: width 0.5s ease;
+.voting-stats .draw-stat {
+    background-color: #c7c4c4;
+    height: 100%;
+    transition: width 0.8s ease-in-out;
+}
+
+.voting-stats .away-stat {
+    background-color: #5C6BC0;
+    height: 100%;
+    transition: width 0.8s ease-in-out;
+}
+
+body.light-mode .voting-stats .home-stat {
+    background-color: #007bff;
+}
+
+body.light-mode .voting-stats .away-stat {
+    background-color: #ff5722;
+}
+
+.voting-stats .stat-value {
+    width: 40px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #212121;
+}
+
+body.light-mode .voting-stats .stat-value {
+    color: #333;
+}
+
+body:not(.light-mode) .voting-stats .stat-value {
+    color: #fff;
 }
 
 .stat-labels {
     display: flex;
     justify-content: space-between;
+    margin-top: 8px;
     font-size: 12px;
-    color: #757575;
-    font-weight: 500;
+    color: #999;
 }
 
-.home-label { color: #27AE60; }
-.draw-label { color: #FFA500; }
-.away-label { color: #E74C3C; }
+body.light-mode .stat-labels {
+    color: #666;
+}
+
+.home-label {
+    color: #4CAF50;
+}
+
+.draw-label {
+    color: #9E9E9E;
+}
+
+.away-label {
+    color: #5C6BC0;
+}
 
 .no-votes-message {
     text-align: center;
@@ -232,150 +307,147 @@
     font-style: italic;
 }
 
-/* ========== 라인업 스타일 ========== */
-
+/* ====== 라인업 스타일 (base.css 통일) ====== */
 .lineup-field {
-    background: linear-gradient(135deg, #f8fff8, #e8f5e8);
-    border-radius: 20px;
-    padding: 2.5rem;
     position: relative;
-    min-height: 450px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    border: 2px solid rgba(39, 174, 96, 0.2);
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0;
+    background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+    border-radius: 20px;
+    border: 2px solid #4a5568;
     overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-/* 필드 배경 패턴 */
+body.light-mode .lineup-field {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border: 2px solid #cbd5e0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
 .lineup-bg {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        /* 센터 라인 */
-        linear-gradient(90deg, transparent 49.5%, rgba(39, 174, 96, 0.3) 49.5%, rgba(39, 174, 96, 0.3) 50.5%, transparent 50.5%),
-        /* 가로 구역선 */
-        linear-gradient(0deg, transparent 30%, rgba(39, 174, 96, 0.1) 30%, rgba(39, 174, 96, 0.1) 32%, transparent 32%),
-        linear-gradient(0deg, transparent 68%, rgba(39, 174, 96, 0.1) 68%, rgba(39, 174, 96, 0.1) 70%, transparent 70%),
-        /* 센터 서클 */
-        radial-gradient(circle at center, transparent 48px, rgba(39, 174, 96, 0.15) 48px, rgba(39, 174, 96, 0.15) 50px, transparent 50px);
-    border-radius: 20px;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(90deg, transparent 49%, rgba(255,255,255,0.1) 50%, transparent 51%),
+        radial-gradient(circle at 50% 50%, transparent 60px, rgba(255,255,255,0.05) 61px, transparent 62px);
+    z-index: 1;
     pointer-events: none;
 }
 
-.lineup-bg::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100px;
-    height: 100px;
-    border: 2px solid rgba(39, 174, 96, 0.2);
-    border-radius: 50%;
+body.light-mode .lineup-bg {
+    background: 
+        linear-gradient(90deg, transparent 49%, rgba(0,0,0,0.05) 50%, transparent 51%),
+        radial-gradient(circle at 50% 50%, transparent 60px, rgba(0,0,0,0.03) 61px, transparent 62px);
 }
 
 .lineup-sides {
-    display: flex;
-    align-items: stretch;
-    height: 100%;
-    min-height: 350px;
     position: relative;
-    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 30px 20px;
+    min-height: 350px;
+    z-index: 2;
+    gap: 80px;
 }
 
 .lineup-team {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    padding: 1.5rem 1rem;
-    position: relative;
+    max-width: 380px;
+    background: rgba(26, 32, 44, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
-.lineup-team.lineup-home {
-    align-items: flex-end;
+.lineup-team:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
-.lineup-team.lineup-away {
-    align-items: flex-start;
+body.light-mode .lineup-team {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-.vs-label {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
-    z-index: 10;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    animation: pulseGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes pulseGlow {
-    0% { box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4); }
-    100% { box-shadow: 0 8px 35px rgba(39, 174, 96, 0.6); }
+body.light-mode .lineup-team:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
 .lineup-group {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-    margin: 0.5rem 0;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.lineup-group:last-child {
+    margin-bottom: 0;
 }
 
 .position-label {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    color: white;
-    padding: 6px 16px;
-    border-radius: 16px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: bold;
+    color: #63b3ed;
+    padding: 6px 12px;
+    background: rgba(99, 179, 237, 0.1);
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid rgba(99, 179, 237, 0.3);
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 45px;
 }
 
-/* 수정된 players-container - grid 기반 */
+body.light-mode .position-label {
+    color: #2b6cb0;
+    background: rgba(43, 108, 176, 0.1);
+    border: 1px solid rgba(43, 108, 176, 0.2);
+}
+
 .players-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 한 행에 2개씩 */
-    gap: 0.6rem;
-    align-items: center;
-    justify-items: center; /* 각 아이템을 가운데 정렬 */
-    min-height: 60px;
-    max-width: 180px;
-    width: 100%; /* 그리드가 제대로 작동하도록 width 설정 */
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 6px;
+    flex: 1;
+    max-width: 100%;
+}
+
+.players-container:has(.player:nth-child(7)) {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 4px;
 }
 
 .player {
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
-    border: 2px solid #27AE60;
-    border-radius: 12px;
-    padding: 8px 16px;
-    font-size: 13px;
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
-    color: #333333;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 80px;
-    max-width: 85px;
-    width: 100%; /* 그리드 아이템이 균등하게 배치되도록 */
-    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+    transition: all 0.2s ease;
+    cursor: default;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .player::before {
@@ -385,62 +457,121 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-    transition: left 0.6s;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
 }
 
 .player:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
-    background: linear-gradient(135deg, #f0fff4, #e8f5e9);
-    border-color: #32CD32;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
 }
 
 .player:hover::before {
     left: 100%;
 }
 
-/* 빈 라인업 표시 - grid에 맞게 수정 */
-.players-container:empty::after {
-    content: '선수 미등록';
-    color: #95a5a6;
-    font-size: 12px;
-    font-style: italic;
-    padding: 8px 12px;
-    background: rgba(149, 165, 166, 0.1);
-    border-radius: 8px;
-    border: 1px dashed #bdc3c7;
-    grid-column: 1 / -1; /* 전체 열에 걸쳐 표시 */
-    text-align: center;
+body.light-mode .player {
+    background: linear-gradient(135deg, #2b6cb0 0%, #2c5282 100%);
+    box-shadow: 0 2px 8px rgba(43, 108, 176, 0.2);
 }
 
-/* 홀수 개의 선수가 있을 때 마지막 선수가 2개 열을 차지하도록 */
-.players-container .player:only-child {
-    grid-column: 1 / -1;
+body.light-mode .player:hover {
+    box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
 }
 
-/* 3명의 선수가 있을 때 마지막 선수를 중앙에 배치 */
-.players-container .player:nth-child(3):last-child {
-    grid-column: 1 / -1;
+.vs-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #e2e8f0;
+    background: rgba(26, 32, 44, 0.9);
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: 2px solid #4a5568;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    z-index: 3;
+    backdrop-filter: blur(10px);
 }
 
-/* 5명의 선수가 있을 때 마지막 선수를 중앙에 배치 */
-.players-container .player:nth-child(5):last-child {
-    grid-column: 1 / -1;
+body.light-mode .vs-label {
+    color: #2d3748;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #cbd5e0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* ========== 채팅 스타일 ========== */
+.lineup-team.lineup-home {
+    border-left: 4px solid #48bb78;
+}
+
+.lineup-team.lineup-away {
+    border-right: 4px solid #ed8936;
+}
+
+.lineup-home .position-label {
+    color: #48bb78;
+    background: rgba(72, 187, 120, 0.1);
+    border-color: rgba(72, 187, 120, 0.3);
+}
+
+.lineup-away .position-label {
+    color: #ed8936;
+    background: rgba(237, 131, 54, 0.1);
+    border-color: rgba(237, 131, 54, 0.3);
+}
+
+.lineup-home .player {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.lineup-away .player {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    box-shadow: 0 2px 8px rgba(237, 131, 54, 0.3);
+}
+
+.lineup-home .player:hover {
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
+.lineup-away .player:hover {
+    box-shadow: 0 4px 12px rgba(237, 131, 54, 0.4);
+}
+
+/* ====== 채팅 스타일 (base.css 통일) ====== */
+.chat-content {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 8px 0;
+}
 
 .chat-messages {
-    height: 320px;
-    overflow-y: auto;
-    background: linear-gradient(135deg, #fafbfc, #f8f9fa);
-    border: 2px solid rgba(39, 174, 96, 0.1);
+    height: 210px;
+    background: var(--chat-bg, #161d2a);
     border-radius: 16px;
-    padding: 1.2rem;
-    margin-bottom: 1.2rem;
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.03);
-    position: relative;
+    overflow-y: auto;
+    padding: 16px 16px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 8px #0002;
+    border: 1px solid var(--chat-border, #27357a);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+body.light-mode .chat-messages {
+    --chat-bg: #f7faff;
+    --chat-border: #b8d1fa;
+    background: var(--chat-bg);
+    border: 1px solid var(--chat-border);
+    box-shadow: 0 2px 16px #b3d2ff33;
 }
 
 .chat-messages::before {
@@ -468,15 +599,23 @@
 }
 
 .chat-msg {
-    margin-bottom: 1rem;
-    padding: 12px 16px;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border-left: 3px solid #e9ecef;
-    animation: slideInMessage 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bubble-bg, #2e3545);
+    color: var(--bubble-color, #fff);
+    padding: 10px 16px 16px 16px;
+    border-radius: 18px 18px 18px 4px;
+    max-width: 80%;
+    margin-bottom: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: flex-start;
+    word-break: break-word;
+    box-shadow: 0 2px 8px #0001;
     position: relative;
-    transition: all 0.2s ease;
+    font-size: 15px;
+    gap: 2px;
+    transition: background 0.15s, color 0.15s;
+    animation: slideInMessage 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-msg:hover {
@@ -485,10 +624,13 @@
 }
 
 .chat-msg.me {
-    background: linear-gradient(135deg, #e8f5e9, #f0fff4);
-    border-left-color: #27AE60;
+    --bubble-bg: #2051ff;
+    --bubble-color: #fff;
+    align-self: flex-end;
+    border-radius: 18px 18px 4px 18px;
+    background: var(--bubble-bg);
+    color: var(--bubble-color);
     margin-left: 2rem;
-    border-radius: 12px 12px 4px 12px;
 }
 
 .chat-msg.me::after {
@@ -500,12 +642,12 @@
     width: 0;
     height: 0;
     border: 8px solid transparent;
-    border-left-color: #e8f5e9;
+    border-left-color: #2051ff;
 }
 
 .chat-msg:not(.me) {
     margin-right: 2rem;
-    border-radius: 12px 12px 12px 4px;
+    border-radius: 18px 18px 12px 4px;
 }
 
 .chat-msg:not(.me)::after {
@@ -517,7 +659,22 @@
     width: 0;
     height: 0;
     border: 8px solid transparent;
-    border-right-color: #ffffff;
+    border-right-color: #2e3545;
+}
+
+body.light-mode .chat-msg {
+    --bubble-bg: #e7f0ff;
+    --bubble-color: #222;
+    border: 1px solid #c1d3f7;
+}
+
+body.light-mode .chat-msg.me {
+    --bubble-bg: #2051ff;
+    --bubble-color: #fff;
+}
+
+body.light-mode .chat-msg:not(.me)::after {
+    border-right-color: #e7f0ff;
 }
 
 @keyframes slideInMessage {
@@ -532,41 +689,47 @@
 }
 
 .chat-nick {
-    font-weight: 700;
-    color: #27AE60;
     font-size: 12px;
+    color: #7abfff;
+    font-weight: bold;
+    margin-bottom: 1px;
+    letter-spacing: 0.2px;
     display: block;
-    margin-bottom: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+}
+
+body.light-mode .chat-nick { 
+    color: #2051ff; 
 }
 
 .chat-msg.me .chat-nick {
-    color: #32CD32;
+    color: #b6e3ff;
 }
 
 .chat-text {
-    color: #333333;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 15px;
+    word-break: break-all;
+    margin-bottom: 2px;
     display: block;
-    word-wrap: break-word;
-    word-break: break-word;
-    margin-bottom: 4px;
+    line-height: 1.5;
 }
 
 .chat-time {
-    font-size: 10px;
-    color: #95a5a6;
-    float: right;
-    font-weight: 500;
+    font-size: 11px;
+    color: #b1c4e7;
+    align-self: flex-end;
+    margin-top: 2px;
     opacity: 0.8;
+    font-weight: 500;
 }
 
-/* 채팅 입력 폼 */
+body.light-mode .chat-time { 
+    color: #5571a2; 
+}
+
 .chat-form {
     display: flex;
-    gap: 0.8rem;
+    gap: 7px;
     align-items: center;
     background: #ffffff;
     padding: 1rem;
@@ -575,48 +738,68 @@
     border: 2px solid rgba(39, 174, 96, 0.1);
 }
 
-.chat-form input {
-    flex: 1;
-    padding: 12px 20px;
-    border: 2px solid #e9ecef;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #f8f9fa;
-    color: #333333;
-    outline: none;
+body:not(.light-mode) .chat-form {
+    background: #232d42;
+    border-color: #345ece;
 }
 
-.chat-form input:focus {
-    border-color: #27AE60;
-    background: #ffffff;
+#chatInput {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 25px;
+    border: 1.5px solid #b8d1fa;
+    font-size: 15px;
+    outline: none;
+    background: #fafdff;
+    color: #222;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    font-weight: 500;
+}
+
+#chatInput:focus {
+    border-color: #2051ff;
+    background: #eaf3fe;
     box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1);
     transform: translateY(-1px);
 }
 
-.chat-form input::placeholder {
+#chatInput::placeholder {
     color: #95a5a6;
     font-weight: 400;
 }
 
-.chat-form button {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    color: white;
+body:not(.light-mode) #chatInput {
+    background: #232d42;
+    color: #fff;
+    border: 1.5px solid #345ece;
+}
+
+body:not(.light-mode) #chatInput:focus {
+    border-color: #2051ff;
+    background: #19223a;
+}
+
+body:not(.light-mode) #chatInput::placeholder {
+    color: #888;
+}
+
+#sendChatBtn {
+    background: #2051ff;
+    color: #fff;
     border: none;
-    padding: 12px 24px;
     border-radius: 25px;
-    font-weight: 600;
-    font-size: 14px;
+    padding: 10px 20px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    font-size: 15px;
+    font-weight: bold;
+    transition: all 0.18s;
+    box-shadow: 0 2px 8px #2051ff22;
     letter-spacing: 0.5px;
     position: relative;
     overflow: hidden;
 }
 
-.chat-form button::before {
+#sendChatBtn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -627,22 +810,21 @@
     transition: left 0.6s;
 }
 
-.chat-form button:hover {
+#sendChatBtn:hover {
+    background: #1537a6;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-    background: linear-gradient(135deg, #32CD32, #27AE60);
+    box-shadow: 0 6px 20px rgba(32, 81, 255, 0.4);
 }
 
-.chat-form button:hover::before {
+#sendChatBtn:hover::before {
     left: 100%;
 }
 
-.chat-form button:active {
+#sendChatBtn:active {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    box-shadow: 0 4px 12px rgba(32, 81, 255, 0.3);
 }
 
-/* 로그인 안내 */
 .chat-login-notice {
     text-align: center;
     padding: 3rem 2rem;
@@ -651,27 +833,28 @@
     border: 2px dashed #dee2e6;
     color: #6c757d;
     font-weight: 500;
+    margin-top: 10px;
 }
 
 .chat-login-notice .login-btn {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
-    color: white;
+    background: #2051ff;
+    color: #fff;
     border: none;
-    padding: 12px 32px;
     border-radius: 25px;
+    padding: 12px 32px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    box-shadow: 0 2px 8px #2051ff22;
     margin-top: 1.5rem;
     letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-login-notice .login-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-    background: linear-gradient(135deg, #32CD32, #27AE60);
+    box-shadow: 0 6px 20px rgba(32, 81, 255, 0.4);
+    background: #1537a6;
 }
 
 /* 빈 채팅방 표시 */
@@ -695,9 +878,13 @@
     margin-bottom: 0.5rem;
 }
 
+body.light-mode .panel-content .match-date {
+    color: #666;
+}
+
 .panel-content .match-league {
     text-align: center;
-    color: #27AE60;
+    color: #2051ff;
     font-weight: 600;
     font-size: 16px;
     margin-bottom: 1rem;
@@ -710,9 +897,9 @@
     gap: 1rem;
     margin-bottom: 1.5rem;
     padding: 1rem;
-    background: rgba(39, 174, 96, 0.05);
+    background: rgba(32, 81, 255, 0.05);
     border-radius: 12px;
-    border: 2px solid rgba(39, 174, 96, 0.1);
+    border: 2px solid rgba(32, 81, 255, 0.1);
 }
 
 .panel-content .match-score .team-name {
@@ -721,14 +908,22 @@
     font-size: 16px;
 }
 
+body.light-mode .panel-content .match-score .team-name {
+    color: #333;
+}
+
+body:not(.light-mode) .panel-content .match-score .team-name {
+    color: #fff;
+}
+
 .panel-content .match-score .score-display {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
+    background: linear-gradient(135deg, #2051ff, #4a90e2);
     color: white;
     padding: 8px 16px;
     border-radius: 12px;
     font-weight: bold;
     font-size: 18px;
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    box-shadow: 0 4px 15px rgba(32, 81, 255, 0.3);
 }
 
 /* 스크롤바 커스터마이징 */
@@ -742,15 +937,68 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #27AE60, #32CD32);
+    background: linear-gradient(135deg, #2051ff, #4a90e2);
     border-radius: 4px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #32CD32, #27AE60);
+    background: linear-gradient(135deg, #4a90e2, #2051ff);
 }
 
-/* 반응형 디자인 */
+/* 경기 결과 표시 스타일 (modal.css 통일) */
+.match-result-display {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 10px 0;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* 포인트 지급 성공 메시지 스타일 (modal.css 통일) */
+.point-success-message {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+body:not(.light-mode) .point-success-message {
+    background: #1e5631;
+    border: 1px solid #28a745;
+    color: #d1f2eb;
+}
+
+/* ====== 반응형 디자인 ====== */
+@media (max-width: 1024px) {
+    .lineup-field {
+        max-width: 95vw;
+    }
+    
+    .lineup-sides {
+        gap: 60px;
+        padding: 25px 15px;
+    }
+    
+    .lineup-team {
+        max-width: 350px;
+        padding: 18px 14px;
+    }
+    
+    .players-container {
+        grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+    }
+    
+    .players-container:has(.player:nth-child(7)) {
+        grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
     .tab {
         padding: 10px 16px;
@@ -770,14 +1018,20 @@
     .admin-result-btns {
         flex-direction: column;
         gap: 0.5rem;
+        align-items: center;
     }
     
-    .stat-row {
+    .admin-result-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .voting-stats .stat-row {
         flex-direction: column;
         gap: 0.5rem;
     }
     
-    .stat-value {
+    .voting-stats .stat-value {
         min-width: auto;
     }
     
@@ -788,65 +1042,55 @@
     }
     
     .lineup-field {
-        padding: 1.5rem 1rem;
-        min-height: 350px;
+        margin: 15px auto;
+        max-width: 95vw;
     }
     
     .lineup-sides {
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 20px;
+        padding: 20px 15px;
         min-height: auto;
+    }
+    
+    .lineup-team {
+        max-width: 100%;
+        padding: 16px 12px;
     }
     
     .vs-label {
         position: static;
         transform: none;
         align-self: center;
-        margin: 0.5rem 0;
-        padding: 8px 20px;
-        font-size: 14px;
-    }
-    
-    .lineup-team {
-        width: 100%;
-        align-items: center !important;
-        padding: 1rem 0.5rem;
+        font-size: 20px;
+        padding: 8px 16px;
+        margin: 10px 0;
+        z-index: 1;
     }
     
     .lineup-group {
-        width: 100%;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
     
-    /* 모바일에서 players-container - 한 행에 3개씩으로 변경 */
     .players-container {
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 100%;
-        gap: 0.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        width: 100%;
+    }
+    
+    .players-container:has(.player:nth-child(7)) {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    }
+    
+    .position-label {
+        font-size: 13px;
+        padding: 5px 10px;
     }
     
     .player {
-        min-width: 60px;
-        max-width: 80px;
-        font-size: 11px;
-        padding: 4px 8px;
-    }
-    
-    /* 모바일에서 홀수 선수 중앙 배치 규칙 재정의 */
-    .players-container .player:only-child {
-        grid-column: 2 / 3; /* 3열 중 가운데 */
-    }
-    
-    .players-container .player:nth-child(2):last-child {
-        grid-column: 1 / 4; /* 2명이면 전체 너비 사용하지 않음 */
-    }
-    
-    .players-container .player:nth-child(4):last-child {
-        grid-column: 2 / 3; /* 4번째가 마지막이면 가운데 */
-    }
-    
-    .players-container .player:nth-child(5):last-child {
-        grid-column: 2 / 3; /* 5번째가 마지막이면 가운데 */
+        font-size: 12px;
+        padding: 6px 8px;
     }
     
     .chat-messages {
@@ -886,6 +1130,121 @@
     }
 }
 
+@media (max-width: 480px) {
+    .lineup-sides {
+        padding: 15px 10px;
+    }
+    
+    .lineup-team {
+        padding: 12px 8px;
+    }
+    
+    .players-container {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+        gap: 4px;
+    }
+    
+    .players-container:has(.player:nth-child(7)) {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 3px;
+    }
+    
+    .player {
+        font-size: 11px;
+        padding: 5px 6px;
+    }
+    
+    .vs-label {
+        font-size: 18px;
+        padding: 6px 14px;
+    }
+    
+    .chat-messages {
+        height: 200px;
+        font-size: 13px;
+    }
+    
+    .tabs .tab {
+        font-size: 14px;
+        padding: 7px 8px;
+    }
+}
+
+/* 빈 라인업 처리 (base.css 통일) */
+.lineup-group:empty::after {
+    content: '선수 정보 없음';
+    color: #a0aec0;
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+    padding: 10px;
+    background: rgba(160, 174, 192, 0.1);
+    border-radius: 8px;
+}
+
+body.light-mode .lineup-group:empty::after {
+    color: #718096;
+    background: rgba(113, 128, 150, 0.1);
+}
+
+.players-container:empty::after {
+    content: '선수 미등록';
+    color: #95a5a6;
+    font-size: 12px;
+    font-style: italic;
+    padding: 8px 12px;
+    background: rgba(149, 165, 166, 0.1);
+    border-radius: 8px;
+    border: 1px dashed #bdc3c7;
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+/* 홀수 개의 선수가 있을 때 마지막 선수 중앙 배치 */
+.players-container .player:only-child {
+    grid-column: 1 / -1;
+}
+
+.players-container .player:nth-child(3):last-child {
+    grid-column: 1 / -1;
+}
+
+.players-container .player:nth-child(5):last-child {
+    grid-column: 1 / -1;
+}
+
+/* 모바일에서 홀수 선수 중앙 배치 규칙 재정의 */
+@media (max-width: 768px) {
+    .players-container {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .player {
+        min-width: 60px;
+        max-width: 80px;
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .players-container .player:only-child {
+        grid-column: 2 / 3;
+    }
+    
+    .players-container .player:nth-child(2):last-child {
+        grid-column: 1 / 4;
+    }
+    
+    .players-container .player:nth-child(4):last-child {
+        grid-column: 2 / 3;
+    }
+    
+    .players-container .player:nth-child(5):last-child {
+        grid-column: 2 / 3;
+    }
+}
+
 /* 접근성 및 모션 감소 */
 @media (prefers-reduced-motion: reduce) {
     .tab-content,
@@ -893,7 +1252,7 @@
     .player,
     .prediction-btn,
     .admin-result-btn,
-    .chat-form button,
+    #sendChatBtn,
     .vs-label {
         animation: none !important;
         transition: none !important;
