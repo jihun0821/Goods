@@ -12,6 +12,7 @@
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
 }
 
 .tab {
@@ -25,10 +26,11 @@
     border: none;
     transition: all 0.3s ease;
     font-size: 14px;
+    border-right: 1px solid #e0e0e0;
 }
 
-.tab:first-child {
-    border-right: 1px solid #e0e0e0;
+.tab:last-child {
+    border-right: none;
 }
 
 .tab.active {
@@ -109,31 +111,22 @@
     border-color: #27AE60;
 }
 
-.prediction-btn.home-win {
-    border-color: #27AE60;
-}
-
 .prediction-btn.home-win:hover {
     background: linear-gradient(135deg, #27AE60, #32CD32);
     color: white;
-}
-
-.prediction-btn.draw {
-    border-color: #FFA500;
+    border-color: #27AE60;
 }
 
 .prediction-btn.draw:hover {
     background: linear-gradient(135deg, #FFA500, #FFD700);
     color: white;
-}
-
-.prediction-btn.away-win {
-    border-color: #E74C3C;
+    border-color: #FFA500;
 }
 
 .prediction-btn.away-win:hover {
     background: linear-gradient(135deg, #E74C3C, #FF6B6B);
     color: white;
+    border-color: #E74C3C;
 }
 
 /* 관리자 결과 설정 버튼 */
@@ -174,10 +167,11 @@
 
 /* 투표 통계 그래프 */
 .voting-stats {
-    background: #f8f8f8;
+    background: #ffffff;
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
 }
 
 .stat-row {
@@ -241,15 +235,13 @@
 /* ========== 라인업 스타일 ========== */
 
 .lineup-field {
-    background: linear-gradient(135deg, #f8fffe, #e8f5e8);
+    background: linear-gradient(135deg, #f8fff8, #e8f5e8);
     border-radius: 20px;
     padding: 2.5rem;
     position: relative;
     min-height: 450px;
-    box-shadow: 
-        0 10px 40px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(39, 174, 96, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    border: 2px solid rgba(39, 174, 96, 0.2);
     overflow: hidden;
 }
 
@@ -316,16 +308,14 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, #27AE60, #2ECC71);
+    background: linear-gradient(135deg, #27AE60, #32CD32);
     color: white;
     padding: 12px 24px;
     border-radius: 30px;
     font-weight: 700;
     font-size: 16px;
     letter-spacing: 1px;
-    box-shadow: 
-        0 8px 25px rgba(39, 174, 96, 0.4),
-        0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
     z-index: 10;
     border: 2px solid rgba(255, 255, 255, 0.3);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -333,8 +323,8 @@
 }
 
 @keyframes pulseGlow {
-    0% { box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1); }
-    100% { box-shadow: 0 8px 35px rgba(39, 174, 96, 0.6), 0 2px 12px rgba(0, 0, 0, 0.15); }
+    0% { box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4); }
+    100% { box-shadow: 0 8px 35px rgba(39, 174, 96, 0.6); }
 }
 
 .lineup-group {
@@ -346,16 +336,14 @@
 }
 
 .position-label {
-    background: linear-gradient(135deg, #27AE60, #2ECC71);
+    background: linear-gradient(135deg, #27AE60, #32CD32);
     color: white;
     padding: 6px 16px;
     border-radius: 16px;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    box-shadow: 
-        0 4px 12px rgba(39, 174, 96, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -378,10 +366,8 @@
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 600;
-    color: #2c3e50;
-    box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    color: #333333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 80px;
     max-width: 85px;
@@ -404,11 +390,9 @@
 
 .player:hover {
     transform: translateY(-3px) scale(1.05);
-    box-shadow: 
-        0 8px 25px rgba(39, 174, 96, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
     background: linear-gradient(135deg, #f0fff4, #e8f5e9);
-    border-color: #2ECC71;
+    border-color: #32CD32;
 }
 
 .player:hover::before {
@@ -437,9 +421,7 @@
     border-radius: 16px;
     padding: 1.2rem;
     margin-bottom: 1.2rem;
-    box-shadow: 
-        inset 0 2px 10px rgba(0, 0, 0, 0.03),
-        0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.03);
     position: relative;
 }
 
@@ -472,9 +454,7 @@
     padding: 12px 16px;
     border-radius: 12px;
     background: #ffffff;
-    box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.04),
-        0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     border-left: 3px solid #e9ecef;
     animation: slideInMessage 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -482,9 +462,7 @@
 }
 
 .chat-msg:hover {
-    box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.06),
-        0 2px 6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     transform: translateY(-1px);
 }
 
@@ -546,11 +524,11 @@
 }
 
 .chat-msg.me .chat-nick {
-    color: #2ECC71;
+    color: #32CD32;
 }
 
 .chat-text {
-    color: #2c3e50;
+    color: #333333;
     font-size: 14px;
     line-height: 1.5;
     display: block;
@@ -575,10 +553,8 @@
     background: #ffffff;
     padding: 1rem;
     border-radius: 16px;
-    box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(39, 174, 96, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(39, 174, 96, 0.1);
 }
 
 .chat-form input {
@@ -590,16 +566,14 @@
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #f8f9fa;
-    color: #2c3e50;
+    color: #333333;
     outline: none;
 }
 
 .chat-form input:focus {
     border-color: #27AE60;
     background: #ffffff;
-    box-shadow: 
-        0 0 0 4px rgba(39, 174, 96, 0.1),
-        0 4px 12px rgba(39, 174, 96, 0.15);
+    box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1);
     transform: translateY(-1px);
 }
 
@@ -609,7 +583,7 @@
 }
 
 .chat-form button {
-    background: linear-gradient(135deg, #27AE60, #2ECC71);
+    background: linear-gradient(135deg, #27AE60, #32CD32);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -618,9 +592,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 4px 15px rgba(39, 174, 96, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
     letter-spacing: 0.5px;
     position: relative;
     overflow: hidden;
@@ -639,10 +611,8 @@
 
 .chat-form button:hover {
     transform: translateY(-2px);
-    box-shadow: 
-        0 6px 20px rgba(39, 174, 96, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    background: linear-gradient(135deg, #2ECC71, #27AE60);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    background: linear-gradient(135deg, #32CD32, #27AE60);
 }
 
 .chat-form button:hover::before {
@@ -651,9 +621,7 @@
 
 .chat-form button:active {
     transform: translateY(-1px);
-    box-shadow: 
-        0 4px 12px rgba(39, 174, 96, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 /* 로그인 안내 */
@@ -668,7 +636,7 @@
 }
 
 .chat-login-notice .login-btn {
-    background: linear-gradient(135deg, #27AE60, #2ECC71);
+    background: linear-gradient(135deg, #27AE60, #32CD32);
     color: white;
     border: none;
     padding: 12px 32px;
@@ -685,7 +653,7 @@
 .chat-login-notice .login-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-    background: linear-gradient(135deg, #2ECC71, #27AE60);
+    background: linear-gradient(135deg, #32CD32, #27AE60);
 }
 
 /* 빈 채팅방 표시 */
@@ -756,13 +724,12 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #27AE60, #2ECC71);
+    background: linear-gradient(135deg, #27AE60, #32CD32);
     border-radius: 4px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #2ECC71, #27AE60);
+    background: linear-gradient(135deg, #32CD32, #27AE60);
 }
 
 /* 반응형 디자인 */
@@ -900,88 +867,6 @@
     
     *:hover {
         transform: none !important;
-    }
-}
-
-/* 다크모드 지원 */
-@media (prefers-color-scheme: dark) {
-    .lineup-field {
-        background: linear-gradient(135deg, #2a2d32, #1e2124);
-        border-color: rgba(39, 174, 96, 0.3);
-    }
-    
-    .player {
-        background: linear-gradient(135deg, #36393f, #2f3136);
-        color: #dcddde;
-        border-color: #27AE60;
-    }
-    
-    .player:hover {
-        background: linear-gradient(135deg, #3a3d42, #33363b);
-    }
-    
-    .chat-messages {
-        background: linear-gradient(135deg, #36393f, #2f3136);
-        border-color: rgba(39, 174, 96, 0.2);
-    }
-    
-    .chat-msg {
-        background: #40444b;
-        color: #dcddde;
-        border-left-color: #72767d;
-    }
-    
-    .chat-msg.me {
-        background: linear-gradient(135deg, #1e3a2e, #2a4b3a);
-    }
-    
-    .chat-form {
-        background: #40444b;
-        border-color: rgba(39, 174, 96, 0.2);
-    }
-    
-    .chat-form input {
-        background: #2f3136;
-        border-color: #40444b;
-        color: #dcddde;
-    }
-    
-    .chat-form input:focus {
-        background: #36393f;
-        border-color: #27AE60;
-    }
-    
-    .chat-login-notice {
-        background: linear-gradient(135deg, #36393f, #2f3136);
-        border-color: #40444b;
-        color: #b9bbbe;
-    }
-    
-    .voting-stats {
-        background: #2a2a2a;
-    }
-    
-    .tab:not(.active) {
-        background: #2a2a2a;
-        color: #ccc;
-    }
-    
-    .prediction-btn {
-        background: #333;
-        color: #fff;
-    }
-    
-    .panel-content .match-score {
-        background: rgba(39, 174, 96, 0.1);
-        border-color: rgba(39, 174, 96, 0.2);
-    }
-    
-    .panel-content .team-name {
-        color: #dcddde;
-    }
-    
-    .panel-content .match-date {
-        color: #b9bbbe;
     }
 }
 
