@@ -1,20 +1,22 @@
-/* ============== 경기 상세 정보 패널 ============== */
 .match-details-panel {
     position: fixed;
-    top: 0;
-    right: -600px;
-    width: 600px;
+    top: 50%;
+    left: 50%;
+    width: 800px;
     height: 100vh;
     background: #ffffff;
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     z-index: 1001;
-    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     border-left: 3px solid #27AE60;
     overflow-y: auto;
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
 }
 
 .match-details-panel.active {
-    right: 0;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
 }
 
 .panel-header {
@@ -141,9 +143,63 @@
 }
 
 .score-display {
-    font-size: 42px;
+    font-size: 20px;
     font-weight: bold;
     color: #27AE60;
+}
+
+.prediction-btns {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    width: 100%;         /* 부모 컨테이너 전체 너비로 설정 */
+    box-sizing: border-box;
+}
+
+.prediction-btn {
+    flex: 1;                    /* 각 버튼이 동일한 너비로 늘어남 */
+    height: 56px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: #fff;
+    border-radius: 12px;
+    border: 3px solid #ddd;
+    color: #333;
+    cursor: pointer;
+    transition: 
+        color 0.2s,
+        border-color 0.2s,
+        background 0.2s,
+        box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    min-width: 200px;            /* 최소 너비 */
+    max-width: 400px;           /* 최대 너비 (원하면 제거 가능) */
+}
+
+.prediction-btn.home-win {
+    border-color: #27AE60;
+    color: #27AE60;
+}
+.prediction-btn.home-win:hover {
+    background: #eafaf2;
+    box-shadow: 0 2px 12px rgba(39,174,96,0.13);
+}
+.prediction-btn.draw {
+    border-color: #aaa;
+    color: #aaa;
+}
+.prediction-btn.draw:hover {
+    background: #f1f1f1;
+    box-shadow: 0 2px 12px rgba(170,170,170,0.13);
+}
+.prediction-btn.away-win {
+    border-color: #EB5757;
+    color: #EB5757;
+}
+.prediction-btn.away-win:hover {
+    background: #fdeeee;
+    box-shadow: 0 2px 12px rgba(235,87,87,0.13);
 }
 
 /* ============== 경기 통계 ============== */
@@ -165,6 +221,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.2rem;
+    margin-top: 1rem;
 }
 
 .stat-value {
@@ -237,6 +294,11 @@
 
 .tab-content {
     margin-top: 1.5rem;
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
 
 /* ============== 이벤트 타임라인 ============== */
@@ -330,11 +392,11 @@
     font-size: 14px;
 }
 
-.players-list {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+.players-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 한 줄에 6명 */
     gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 .player {
@@ -345,6 +407,8 @@
     color: #212121;
     border: 1px solid #e0e0e0;
     transition: all 0.3s ease;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .player:hover {
@@ -352,6 +416,153 @@
     color: white;
     transform: translateX(5px);
     box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* ============== 채팅 =============== */
+
+.chat-messages {
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f8f8;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1.5px solid #e0e0e0;
+    font-size: 15px;
+    color: #212121;
+    box-sizing: border-box;
+}
+
+.chat-messages .message {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: #fff;
+    border-radius: 7px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    word-break: break-all;
+    color: #333;
+    box-shadow: 0 1px 5px rgba(39,174,96,0.07);
+}
+
+.chat-messages .message.mine {
+    border-left: 3px solid #27AE60;
+    background: #eafaf2;
+}
+
+.chat-messages .message.time {
+    font-size: 12px;
+    color: #757575;
+    background: transparent;
+    border: none;
+    margin: 0.2rem 0;
+    padding: 0;
+}
+
+.chat-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.7rem;
+}
+
+#chatInput {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+    color: #212121;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#chatInput:focus {
+    border-color: #27AE60;
+}
+
+#sendChatBtn {
+    padding: 0.7rem 1.3rem;
+    background: #27AE60;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 6px rgba(39,174,96,0.13);
+}
+
+#sendChatBtn:hover {
+    background: #219150;
+}
+
+.chat-login-notice {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.login-btn {
+    background: #27AE60;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.5rem;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 1px 6px rgba(39,174,96,0.13);
+}
+.login-btn:hover {
+    background: #219150;
+}
+
+.chat-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 15px;
+    color: #333;
+    box-sizing: border-box;
+    box-shadow: 0 1px 6px rgba(39,174,96,0.07);
+    word-break: break-all;
+    transition: background 0.25s, box-shadow 0.25s;
+    max-width: 400px;
+}
+
+.chat-msg.me {
+    border-left: 3px solid #27AE60;
+    background: #eafaf2;
+}
+
+.chat-nick {
+    color: #27AE60;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    font-size: 15px;
+}
+
+.chat-text {
+    flex: 1;
+    color: #222;
+    font-size: 15px;
+}
+
+.chat-time {
+    font-size: 12px;
+    color: #757575;
+    margin-left: 0.5rem;
+    min-width: 60px;
+    text-align: right;
 }
 
 /* ============== 모달 기본 스타일 ============== */
