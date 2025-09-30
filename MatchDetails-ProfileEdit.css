@@ -91,6 +91,126 @@
     pointer-events: none;
 }
 
+/* 메인 화면 승부예측 컨테이너 */
+.main-prediction-container {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 메인 화면 승부예측 버튼 그룹 (인라인) */
+.prediction-btns-inline {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* 메인 화면 작은 승부예측 버튼 */
+.prediction-btn-small {
+    padding: 8px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.prediction-btn-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.prediction-btn-small.home-win {
+    border-color: #3498db;
+}
+
+.prediction-btn-small.home-win:hover {
+    background: #3498db;
+}
+
+.prediction-btn-small.draw {
+    border-color: #95a5a6;
+}
+
+.prediction-btn-small.draw:hover {
+    background: #95a5a6;
+}
+
+.prediction-btn-small.away-win {
+    border-color: #e74c3c;
+}
+
+.prediction-btn-small.away-win:hover {
+    background: #e74c3c;
+}
+
+/* 로그인 안내 메시지 */
+.prediction-login-notice {
+    text-align: center;
+    padding: 10px;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* 경기 결과 표시 */
+.match-result {
+    text-align: center;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #27AE60;
+    background: rgba(39, 174, 96, 0.1);
+    border-radius: 6px;
+}
+
+/* 관리자 결과 설정 버튼 */
+.admin-result-btns {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    justify-content: center;
+}
+
+.admin-result-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: white;
+}
+
+.admin-result-btn.home-win {
+    border-color: #3498db;
+}
+
+.admin-result-btn.home-win:hover {
+    background: #3498db;
+}
+
+.admin-result-btn.draw {
+    border-color: #95a5a6;
+}
+
+.admin-result-btn.draw:hover {
+    background: #95a5a6;
+}
+
+.admin-result-btn.away-win {
+    border-color: #e74c3c;
+}
+
+.admin-result-btn.away-win:hover {
+    background: #e74c3c;
+}
+
 /* ============== 경기 상세 정보 헤더 ============== */
 .match-detail-header {
     display: flex;
