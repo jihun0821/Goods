@@ -83,6 +83,14 @@
     visibility: visible;
 }
 
+.overlay:not(.active) {
+    pointer-events: none;
+}
+
+.match-details-panel:not(.active) {
+    pointer-events: none;
+}
+
 /* ============== 경기 상세 정보 헤더 ============== */
 .match-detail-header {
     display: flex;
