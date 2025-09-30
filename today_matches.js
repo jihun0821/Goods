@@ -116,8 +116,75 @@ class TodayMatchManager {
         }
     }
 
+    // 승부예측 HTML 생성 (재사용 가능)
+    async generatePredictionHtml(matchDetails, matchId, isMainDisplay = false) {
+        const isLoggedIn = !!(this.auth.currentUser);
+        const userVoted = isLoggedIn ? await this.hasUserVoted(matchId) : false;
+        
+        // 관리자 권한 체크
+        let isAdmin = false;
+        if (isLoggedIn) {
+            try {
+                const adminDocRef = window.firebase.doc(this.db, "admins", this.auth.currentUser.email);
+                const adminDoc = await window.firebase.getDoc(adminDocRef);
+                isAdmin = adminDoc.exists();
+            } catch (error) {
+                console.error("관리자 권한 확인 실패:", error);
+            }
+        }
+        
+        let predictionHtml = "";
+        
+        // 경기가 finished 상태이고 관리자인 경우 결과 설정 버튼 표시 (패널에만)
+        if (matchDetails.status === "finished" && isAdmin && !matchDetails.adminResult && !isMainDisplay) {
+            predictionHtml = `
+                <h3>경기 결과 설정 (관리자)</h3>
+                <div class="admin-result-btns">
+                    <button class="admin-result-btn home-win" onclick="todayMatchManager.setMatchResult('${matchId}', 'homeWin')">홈팀 승</button>
+                    <button class="admin-result-btn draw" onclick="todayMatchManager.setMatchResult('${matchId}', 'draw')">무승부</button>
+                    <button class="admin-result-btn away-win" onclick="todayMatchManager.setMatchResult('${matchId}', 'awayWin')">원정팀 승</button>
+                </div>
+            `;
+        }
+        // 관리자가 결과를 이미 설정한 경우
+        else if (matchDetails.status === "finished" && matchDetails.adminResult) {
+            const resultText = {
+                'homeWin': '홈팀 승',
+                'draw': '무승부', 
+                'awayWin': '원정팀 승'
+            }[matchDetails.adminResult] || '결과 미정';
+            
+            if (isMainDisplay) {
+                predictionHtml = `<div class="match-result">결과: ${resultText}</div>`;
+            } else {
+                predictionHtml = `<h3>경기 결과: ${resultText}</h3>`;
+            }
+        }
+        // 예정된 경기의 승부예측
+        else if (matchDetails.status === "scheduled") {
+            if (!isLoggedIn) {
+                predictionHtml = isMainDisplay 
+                    ? '<div class="prediction-login-notice">로그인 후 승부예측 가능</div>'
+                    : '<p style="text-align:center;color:#aaa;">로그인 후 승부예측을 이용할 수 있습니다.</p>';
+            } else if (userVoted) {
+                predictionHtml = ''; // 투표 완료 시 메인에는 표시하지 않음
+            } else {
+                const btnClass = isMainDisplay ? 'prediction-btn-small' : 'prediction-btn';
+                predictionHtml = `
+                    ${isMainDisplay ? '' : '<h3>승부예측</h3>'}
+                    <div class="prediction-btns ${isMainDisplay ? 'prediction-btns-inline' : ''}">
+                        <button class="${btnClass} home-win" data-vote="homeWin" data-match-id="${matchId}">1</button>
+                        <button class="${btnClass} draw" data-vote="draw" data-match-id="${matchId}">X</button>
+                        <button class="${btnClass} away-win" data-vote="awayWin" data-match-id="${matchId}">2</button>
+                    </div>`;
+            }
+        }
+        
+        return predictionHtml;
+    }
+
     // UI 업데이트
-    updateTodayMatchUI() {
+    async updateTodayMatchUI() {
         const matchDate = document.getElementById('matchDate');
         const matchTeams = document.getElementById('matchTeams');
         const matchScore = document.getElementById('matchScore');
@@ -167,8 +234,54 @@ class TodayMatchManager {
             matchStatus.className = `match-status ${currentMatch.status || 'scheduled'}`;
         }
 
+        // 승부예측 버튼 추가
+        await this.updateMainPredictionButtons(currentMatch);
+
         // 내비게이션 버튼 상태 업데이트
         this.updateNavigationButtons();
+    }
+
+    // 메인 화면 승부예측 버튼 업데이트
+    async updateMainPredictionButtons(matchDetails) {
+        const matchInfo = document.getElementById('matchInfo');
+        if (!matchInfo) return;
+
+        // 기존 승부예측 컨테이너 제거
+        let predictionContainer = matchInfo.querySelector('.main-prediction-container');
+        if (predictionContainer) {
+            predictionContainer.remove();
+        }
+
+        // 새 승부예측 HTML 생성
+        const predictionHtml = await this.generatePredictionHtml(matchDetails, matchDetails.id, true);
+        
+        if (predictionHtml) {
+            predictionContainer = document.createElement('div');
+            predictionContainer.className = 'main-prediction-container';
+            predictionContainer.innerHTML = predictionHtml;
+            matchInfo.appendChild(predictionContainer);
+
+            // 버튼 이벤트 리스너 추가
+            this.setupMainPredictionButtons(predictionContainer, matchDetails.id);
+        }
+    }
+
+    // 메인 화면 승부예측 버튼 이벤트 설정
+    setupMainPredictionButtons(container, matchId) {
+        const buttons = container.querySelectorAll('.prediction-btn-small');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation(); // 경기 상세 모달이 열리는 것 방지
+                const voteType = btn.getAttribute("data-vote");
+                const success = await this.saveVoteToFirestore(matchId, voteType);
+                if (success) {
+                    alert('투표가 완료되었습니다!');
+                    // UI 새로고침
+                    const currentMatch = this.todayMatches[this.currentMatchIndex];
+                    await this.updateMainPredictionButtons(currentMatch);
+                }
+            });
+        });
     }
 
     // 내비게이션 버튼 상태 업데이트
@@ -883,7 +996,7 @@ class TodayMatchManager {
         await this.waitForFirebase();
         
         const hasMatches = await this.loadTodayMatches();
-        this.updateTodayMatchUI();
+        await this.updateTodayMatchUI();
         this.setupEventListeners();
 
         console.log("TodayMatchManager 초기화 완료");
