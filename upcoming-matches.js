@@ -3,22 +3,29 @@
 (function() {
   console.log('upcoming-matches.js 로드됨');
   
-  // Firebase 초기화 대기
+  // Firebase 초기화 대기 (더 긴 타임아웃과 함께)
   function waitForFirebase() {
-    return new Promise((resolve) => {
-      if (window.firebase && window.firebaseApp && window.db) {
-        console.log('Firebase 준비 완료');
-        resolve();
-      } else {
-        console.log('Firebase 대기 중...');
-        const checkInterval = setInterval(() => {
-          if (window.firebase && window.firebaseApp && window.db) {
-            clearInterval(checkInterval);
-            console.log('Firebase 준비 완료');
-            resolve();
-          }
-        }, 100);
-      }
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 50; // 5초 대기
+      
+      const checkInterval = setInterval(() => {
+        attempts++;
+        console.log(`Firebase 확인 시도 ${attempts}/${maxAttempts}...`);
+        console.log('window.firebase:', !!window.firebase);
+        console.log('window.firebaseApp:', !!window.firebaseApp);
+        console.log('window.db:', !!window.db);
+        
+        if (window.firebase && window.firebaseApp && window.db) {
+          clearInterval(checkInterval);
+          console.log('Firebase 준비 완료!');
+          resolve();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkInterval);
+          console.error('Firebase 초기화 타임아웃');
+          reject(new Error('Firebase 초기화 실패'));
+        }
+      }, 100);
     });
   }
 
@@ -144,11 +151,14 @@
     `;
   }
 
-  // 페이지 로드 시 실행
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadUpcomingMatches);
-  } else {
-    loadUpcomingMatches();
-  }
+  // 페이지 로드 시 실행 (더 늦게 실행)
+  window.addEventListener('load', () => {
+    console.log('window.load 이벤트 발생');
+    // 페이지 완전히 로드된 후 추가 지연
+    setTimeout(() => {
+      console.log('경기 일정 로딩 시도...');
+      loadUpcomingMatches();
+    }, 1000);
+  });
 
 })();
