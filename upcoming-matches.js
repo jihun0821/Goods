@@ -1,15 +1,20 @@
 // upcoming-matches.js - 예정된 경기 일정을 표시하는 스크립트
 
 (function() {
+  console.log('upcoming-matches.js 로드됨');
+  
   // Firebase 초기화 대기
   function waitForFirebase() {
     return new Promise((resolve) => {
       if (window.firebase && window.firebaseApp && window.db) {
+        console.log('Firebase 준비 완료');
         resolve();
       } else {
+        console.log('Firebase 대기 중...');
         const checkInterval = setInterval(() => {
           if (window.firebase && window.firebaseApp && window.db) {
             clearInterval(checkInterval);
+            console.log('Firebase 준비 완료');
             resolve();
           }
         }, 100);
@@ -27,6 +32,7 @@
   // 경기 일정 불러오기
   async function loadUpcomingMatches() {
     try {
+      console.log('경기 일정 로딩 시작...');
       await waitForFirebase();
       
       const { collection, query, where, orderBy, limit, getDocs } = window.firebase;
@@ -36,6 +42,8 @@
       // 오늘 날짜의 시작 시간
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      
+      console.log('오늘 날짜:', today);
       
       // scheduled 상태이고 오늘 이후의 경기를 날짜순으로 5개 가져오기
       const q = query(
@@ -58,6 +66,9 @@
         });
       });
       
+      console.log('불러온 경기 수:', matches.length);
+      console.log('경기 데이터:', matches);
+      
       displayUpcomingMatches(matches);
       
     } catch (error) {
@@ -68,9 +79,24 @@
 
   // 경기 일정 표시
   function displayUpcomingMatches(matches) {
-    const container = document.querySelector('.list-card .list-items');
+    // 경기일정 리스트를 찾기 (두 번째 list-card)
+    const listCards = document.querySelectorAll('.side-lists .list-card');
+    let container = null;
     
-    if (!container) return;
+    // "경기일정" 제목을 가진 카드 찾기
+    listCards.forEach(card => {
+      const title = card.querySelector('.list-title');
+      if (title && title.textContent.trim() === '경기일정') {
+        container = card.querySelector('.list-items');
+      }
+    });
+    
+    if (!container) {
+      console.error('경기일정 컨테이너를 찾을 수 없습니다');
+      return;
+    }
+    
+    console.log('경기일정 표시 중...');
     
     if (matches.length === 0) {
       container.innerHTML = `
@@ -93,11 +119,21 @@
         </li>
       `;
     }).join('');
+    
+    console.log('경기일정 표시 완료');
   }
 
   // 오류 표시
   function displayError() {
-    const container = document.querySelector('.list-card .list-items');
+    const listCards = document.querySelectorAll('.side-lists .list-card');
+    let container = null;
+    
+    listCards.forEach(card => {
+      const title = card.querySelector('.list-title');
+      if (title && title.textContent.trim() === '경기일정') {
+        container = card.querySelector('.list-items');
+      }
+    });
     
     if (!container) return;
     
