@@ -42,9 +42,17 @@
       console.log('경기 일정 로딩 시작...');
       await waitForFirebase();
       
-      const { collection, query, where, orderBy, limit, getDocs } = window.firebase;
       const db = window.db;
-      const matchesRef = collection(db, 'matches');
+      
+      // scheduled 상태의 모든 경기 가져오기
+      const querySnapshot = await window.firebase.getDocs(
+        window.firebase.query(
+          window.firebase.collection(db, 'matches'),
+          window.firebase.where('status', '==', 'scheduled')
+        )
+      );
+      
+      console.log('scheduled 경기 수:', querySnapshot.size);
       
       // 오늘 날짜의 시작 시간
       const today = new Date();
@@ -52,31 +60,56 @@
       
       console.log('오늘 날짜:', today);
       
-      // scheduled 상태이고 오늘 이후의 경기를 날짜순으로 5개 가져오기
-      const q = query(
-        matchesRef,
-        where('status', '==', 'scheduled'),
-        where('date', '>=', today),
-        orderBy('date', 'asc'),
-        limit(5)
+      const querySnapshot = await window.firebase.getDocs(
+        window.firebase.query(
+          window.firebase.collection(db, 'matches'),
+          window.firebase.where('status', '==', 'scheduled')
+        )
       );
       
-      const querySnapshot = await getDocs(q);
+      console.log('scheduled 경기 수:', querySnapshot.size);
+      
+      // 오늘 날짜의 시작 시간
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      console.log('오늘 날짜:', today);
+      
       const matches = [];
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        matches.push({
-          id: doc.id,
-          ...data,
-          date: data.date.toDate() // Timestamp를 Date로 변환
-        });
+        let matchDate = null;
+        
+        // Firestore Timestamp를 Date로 변환
+        if (data.date && data.date.toDate) {
+          matchDate = data.date.toDate();
+        } else if (data.date instanceof Date) {
+          matchDate = data.date;
+        } else if (typeof data.date === 'string') {
+          matchDate = new Date(data.date);
+        }
+        
+        // 오늘 이후의 경기만 추가
+        if (matchDate && matchDate >= today) {
+          matches.push({
+            id: doc.id,
+            ...data,
+            date: matchDate
+          });
+        }
       });
       
-      console.log('불러온 경기 수:', matches.length);
-      console.log('경기 데이터:', matches);
+      // 날짜순으로 정렬
+      matches.sort((a, b) => a.date - b.date);
       
-      displayUpcomingMatches(matches);
+      // 최대 5개만 선택
+      const upcomingMatches = matches.slice(0, 5);
+      
+      console.log('불러온 경기 수:', upcomingMatches.length);
+      console.log('경기 데이터:', upcomingMatches);
+      
+      displayUpcomingMatches(upcomingMatches);
       
     } catch (error) {
       console.error('경기 일정 로딩 오류:', error);
