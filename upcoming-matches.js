@@ -13,10 +13,10 @@
         attempts++;
         console.log(`Firebase 확인 시도 ${attempts}/${maxAttempts}...`);
         console.log('window.firebase:', !!window.firebase);
-        console.log('window.firebaseApp:', !!window.firebaseApp);
         console.log('window.db:', !!window.db);
         
-        if (window.firebase && window.firebaseApp && window.db) {
+        // firebaseApp 체크 제거 - db만 있으면 충분
+        if (window.firebase && window.db) {
           clearInterval(checkInterval);
           console.log('Firebase 준비 완료!');
           resolve();
