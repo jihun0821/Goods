@@ -1,16 +1,14 @@
 // upcoming-matches.js - 예정된 경기 일정을 표시하는 스크립트
 
 (function() {
-  const { getFirestore, collection, query, where, getDocs, orderBy, limit } = window.firebase;
-
   // Firebase 초기화 대기
   function waitForFirebase() {
     return new Promise((resolve) => {
-      if (window.firebaseApp && window.db) {
+      if (window.firebase && window.firebaseApp && window.db) {
         resolve();
       } else {
         const checkInterval = setInterval(() => {
-          if (window.firebaseApp && window.db) {
+          if (window.firebase && window.firebaseApp && window.db) {
             clearInterval(checkInterval);
             resolve();
           }
@@ -31,6 +29,7 @@
     try {
       await waitForFirebase();
       
+      const { collection, query, where, orderBy, limit, getDocs } = window.firebase;
       const db = window.db;
       const matchesRef = collection(db, 'matches');
       
