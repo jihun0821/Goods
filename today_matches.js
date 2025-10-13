@@ -116,7 +116,7 @@ class TodayMatchManager {
         }
     }
 
-    // UI 업데이트
+    // UI 업데이트 메서드 (today_matches.js의 updateTodayMatchUI 메서드 교체용)
     updateTodayMatchUI() {
         const matchDate = document.getElementById('matchDate');
         const matchTeams = document.getElementById('matchTeams');
@@ -137,39 +137,57 @@ class TodayMatchManager {
         if (noMatches) noMatches.style.display = 'none';
 
         const currentMatch = this.todayMatches[this.currentMatchIndex];
-        
+    
+        // 날짜 표시 (시간 제외 - 공간 절약)
         if (matchDate) {
-            matchDate.textContent = currentMatch.date + (currentMatch.time ? ` ${currentMatch.time}` : '');
+            matchDate.textContent = currentMatch.date;
         }
-        
+    
+        // 팀명 표시
         if (matchTeams) {
             matchTeams.textContent = `${currentMatch.homeTeam} vs ${currentMatch.awayTeam}`;
         }
 
-        if (matchScore) {
-            if (currentMatch.status === 'finished') {
-                matchScore.textContent = `${currentMatch.homeScore} - ${currentMatch.awayScore}`;
+        // 점수 및 상태 표시
+        if (currentMatch.status === 'finished') {
+            // 종료된 경기: 점수 표시
+            if (matchScore) {
+                matchScore.textContent = `${currentMatch.homeScore || 0} - ${currentMatch.awayScore || 0}`;
                 matchScore.style.display = 'block';
-            } else {
+            }
+            if (matchStatus) {
+                matchStatus.textContent = '종료';
+                matchStatus.className = 'match-status finished';
+            }
+        } else if (currentMatch.status === 'live') {
+            // 진행중인 경기: 점수 + 상태 표시
+            if (matchScore) {
+                matchScore.textContent = `${currentMatch.homeScore || 0} - ${currentMatch.awayScore || 0}`;
+                matchScore.style.display = 'block';
+            }
+            if (matchStatus) {
+                matchStatus.textContent = '진행중';
+                matchStatus.className = 'match-status live';
+            }
+        } else {
+            // 예정/취소된 경기: 점수 숨김
+            if (matchScore) {
                 matchScore.style.display = 'none';
+            }
+            if (matchStatus) {
+                const statusText = {
+                    'scheduled': '예정',
+                    'cancelled': '취소'
+                }[currentMatch.status] || '예정';
+            
+                matchStatus.textContent = statusText;
+                matchStatus.className = `match-status ${currentMatch.status || 'scheduled'}`;
             }
         }
 
-        if (matchStatus) {
-            const statusText = {
-                'scheduled': '예정',
-                'live': '진행중',
-                'finished': '종료',
-                'cancelled': '취소'
-            }[currentMatch.status] || '예정';
-            
-            matchStatus.textContent = statusText;
-            matchStatus.className = `match-status ${currentMatch.status || 'scheduled'}`;
-        }
-
-        // 내비게이션 버튼 상태 업데이트
-        this.updateNavigationButtons();
-    }
+    // 내비게이션 버튼 상태 업데이트
+    this.updateNavigationButtons();
+}
 
     // 내비게이션 버튼 상태 업데이트
     updateNavigationButtons() {
