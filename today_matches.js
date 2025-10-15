@@ -148,43 +148,6 @@ class TodayMatchManager {
             matchTeams.textContent = `${currentMatch.homeTeam} vs ${currentMatch.awayTeam}`;
         }
 
-        // 점수 및 상태 표시
-        if (currentMatch.status === 'finished') {
-            // 종료된 경기: 점수 표시
-            if (matchScore) {
-                matchScore.textContent = `${currentMatch.homeScore || 0} - ${currentMatch.awayScore || 0}`;
-                matchScore.style.display = 'block';
-            }
-            if (matchStatus) {
-                matchStatus.textContent = '종료';
-                matchStatus.className = 'match-status finished';
-            }
-        } else if (currentMatch.status === 'live') {
-            // 진행중인 경기: 점수 + 상태 표시
-            if (matchScore) {
-                matchScore.textContent = `${currentMatch.homeScore || 0} - ${currentMatch.awayScore || 0}`;
-                matchScore.style.display = 'block';
-            }
-            if (matchStatus) {
-                matchStatus.textContent = '진행중';
-                matchStatus.className = 'match-status live';
-            }
-        } else {
-            // 예정/취소된 경기: 점수 숨김
-            if (matchScore) {
-                matchScore.style.display = 'none';
-            }
-            if (matchStatus) {
-                const statusText = {
-                    'scheduled': '예정',
-                    'cancelled': '취소'
-                }[currentMatch.status] || '예정';
-            
-                matchStatus.textContent = statusText;
-                matchStatus.className = `match-status ${currentMatch.status || 'scheduled'}`;
-            }
-        }
-
     // 내비게이션 버튼 상태 업데이트
     this.updateNavigationButtons();
 }
