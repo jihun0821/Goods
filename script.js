@@ -1,0 +1,461 @@
+// Firebase 설정
+const firebaseConfig = {
+    apiKey: "AIzaSyC_YES_I20XByZpXjCN2p1Vp5gueS4Op24",
+    authDomain: "hsp-auth-22845.firebaseapp.com",
+    projectId: "hsp-auth-22845",
+    storageBucket: "hsp-auth-22845.firebasestorage.app",
+    messagingSenderId: "1034282361573",
+    appId: "1:1034282361573:web:a15b970a18ae7033552a0c",
+    measurementId: "G-EQZ1QFGDZ2"
+};
+
+let app, db, auth, storage;
+let currentUser = null;
+let selectedImage = null;
+
+// Firebase 초기화 (goods 데이터베이스 사용)
+function initializeFirebase() {
+    if (window.firebase && window.firebase.initializeApp) {
+        app = window.firebase.initializeApp(firebaseConfig);
+        
+        // goods 데이터베이스를 명시적으로 지정
+        db = window.firebase.getFirestore(app, 'goods');
+        
+        auth = window.firebase.getAuth(app);
+        storage = window.firebase.getStorage(app);
+        console.log("Firebase 초기화 완료 (goods 데이터베이스)");
+        setupAuthListener();
+        return true;
+    }
+    return false;
+}
+
+// Firebase 초기화 대기
+function waitForFirebaseInit() {
+    const checkInit = () => {
+        if (initializeFirebase()) {
+            return;
+        }
+        setTimeout(checkInit, 100);
+    };
+    checkInit();
+}
+
+// 사이드바 토글
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+// 모든 모달 닫기
+function closeAllModals() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('signupModal').style.display = 'none';
+    document.getElementById('profileModal').style.display = 'none';
+    document.getElementById('passwordResetModal').style.display = 'none';
+    document.getElementById('productModal').style.display = 'none';
+}
+
+// 로그인 모달 열기
+function openLoginModal() {
+    closeAllModals();
+    document.getElementById('loginModal').style.display = 'flex';
+}
+
+// 회원가입 모달 열기
+function openSignupModal() {
+    closeAllModals();
+    document.getElementById('signupModal').style.display = 'flex';
+}
+
+// 프로필 설정 모달 열기
+function openProfileModal() {
+    closeAllModals();
+    document.getElementById('profileModal').style.display = 'flex';
+}
+
+// 비밀번호 재설정 모달 열기
+function openPasswordResetModal() {
+    closeAllModals();
+    document.getElementById('passwordResetModal').style.display = 'flex';
+}
+
+// 제품 등록 모달 열기
+function openProductModal() {
+    if (!currentUser) {
+        alert('제품을 등록하려면 로그인이 필요합니다.');
+        openLoginModal();
+        return;
+    }
+    closeAllModals();
+    document.getElementById('productModal').style.display = 'flex';
+    selectedImage = null;
+    document.getElementById('imagePreview').innerHTML = '';
+}
+
+// 로그인 처리
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        alert('이메일과 비밀번호를 입력해주세요.');
+        return;
+    }
+    
+    try {
+        const userCredential = await window.firebase.signInWithEmailAndPassword(auth, email, password);
+        console.log('로그인 성공:', userCredential.user.email);
+        closeAllModals();
+        alert('로그인 성공!');
+    } catch (error) {
+        console.error('로그인 실패:', error);
+        alert('로그인에 실패했습니다: ' + error.message);
+    }
+}
+
+// 회원가입 1단계 (이메일, 비밀번호 검증)
+function handleSignupNext() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    
+    // 이메일 검증
+    if (!email.endsWith('@hanilgo.cnehs.kr')) {
+        alert('한일고 이메일(@hanilgo.cnehs.kr)을 사용해주세요.');
+        return;
+    }
+    
+    // 비밀번호 검증
+    if (password.length < 6) {
+        alert('비밀번호는 6자 이상이어야 합니다.');
+        return;
+    }
+    
+    // 임시로 데이터 저장
+    window.tempSignupData = { email, password };
+    
+    // 프로필 설정 모달로 이동
+    openProfileModal();
+}
+
+// 회원가입 완료
+async function handleSignupComplete() {
+    const nickname = document.getElementById('nickname').value.trim();
+    
+    if (!nickname) {
+        alert('닉네임을 입력해주세요.');
+        return;
+    }
+    
+    if (nickname.length < 2 || nickname.length > 20) {
+        alert('닉네임은 2자 이상 20자 이하로 입력해주세요.');
+        return;
+    }
+    
+    if (!window.tempSignupData) {
+        alert('회원가입 정보가 없습니다. 다시 시도해주세요.');
+        return;
+    }
+    
+    try {
+        // Firebase Auth 회원가입
+        const userCredential = await window.firebase.createUserWithEmailAndPassword(
+            auth, 
+            window.tempSignupData.email, 
+            window.tempSignupData.password
+        );
+        
+        const user = userCredential.user;
+        
+        // 프로필 업데이트
+        await window.firebase.updateProfile(user, {
+            displayName: nickname
+        });
+        
+        // Firestore에 프로필 저장
+        await window.firebase.setDoc(window.firebase.doc(db, 'profiles', user.uid), {
+            nickname: nickname,
+            email: user.email,
+            createdAt: new Date()
+        });
+        
+        console.log('회원가입 성공:', user.email);
+        closeAllModals();
+        
+        // 임시 데이터 삭제
+        delete window.tempSignupData;
+        
+        alert('회원가입이 완료되었습니다!');
+        
+    } catch (error) {
+        console.error('회원가입 실패:', error);
+        alert('회원가입에 실패했습니다: ' + error.message);
+    }
+}
+
+// 비밀번호 재설정
+async function handlePasswordReset() {
+    const email = document.getElementById('resetEmail').value.trim();
+    
+    if (!email) {
+        alert('이메일을 입력해주세요.');
+        return;
+    }
+    
+    try {
+        await window.firebase.sendPasswordResetEmail(auth, email);
+        alert('비밀번호 재설정 이메일을 보냈습니다. 이메일을 확인해주세요.');
+        closeAllModals();
+    } catch (error) {
+        console.error('비밀번호 재설정 실패:', error);
+        alert('비밀번호 재설정에 실패했습니다: ' + error.message);
+    }
+}
+
+// 로그아웃
+async function logout() {
+    try {
+        await window.firebase.signOut(auth);
+        console.log('로그아웃 성공');
+        alert('로그아웃되었습니다.');
+    } catch (error) {
+        console.error('로그아웃 실패:', error);
+    }
+}
+
+// UI 업데이트
+function updateUI(user) {
+    const loginButton = document.getElementById('loginButton');
+    const userInfo = document.getElementById('userInfo');
+    
+    if (user) {
+        currentUser = user;
+        loginButton.textContent = 'LOGOUT';
+        loginButton.onclick = logout;
+        userInfo.textContent = `- ${user.displayName || user.email}`;
+    } else {
+        currentUser = null;
+        loginButton.textContent = 'LOGIN';
+        loginButton.onclick = openLoginModal;
+        userInfo.textContent = '- 로그인이 필요합니다';
+    }
+}
+
+// 인증 상태 감지
+function setupAuthListener() {
+    window.firebase.onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log('사용자 로그인됨:', user.email);
+            updateUI(user);
+        } else {
+            console.log('사용자 로그아웃됨');
+            updateUI(null);
+        }
+        // 로그인 여부와 관계없이 제품 목록 로드
+        loadProducts();
+    });
+}
+
+// 이미지 선택 처리
+function handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (file) {
+        if (!file.type.startsWith('image/')) {
+            alert('이미지 파일만 선택할 수 있습니다.');
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+            alert('이미지 크기는 5MB 이하여야 합니다.');
+            return;
+        }
+        
+        selectedImage = file;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            document.getElementById('imagePreview').innerHTML = 
+                `<img src="${event.target.result}" alt="미리보기">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 제품 등록 처리
+async function handleProductSubmit() {
+    const name = document.getElementById('productName').value.trim();
+    const price = document.getElementById('productPrice').value.trim();
+    const description = document.getElementById('productDescription').value.trim();
+    
+    if (!selectedImage) {
+        alert('제품 이미지를 선택해주세요.');
+        return;
+    }
+    
+    if (!name) {
+        alert('제품 이름을 입력해주세요.');
+        return;
+    }
+    
+    if (!price || price <= 0) {
+        alert('올바른 가격을 입력해주세요.');
+        return;
+    }
+    
+    if (!description) {
+        alert('제품 설명을 입력해주세요.');
+        return;
+    }
+    
+    try {
+        // 이미지 업로드
+        const imageFileName = `${Date.now()}_${selectedImage.name}`;
+        const storageRef = window.firebase.ref(storage, `goods_image/${imageFileName}`);
+        await window.firebase.uploadBytes(storageRef, selectedImage);
+        const imageUrl = await window.firebase.getDownloadURL(storageRef);
+        
+        // Firestore에 제품 정보 저장
+        await window.firebase.addDoc(window.firebase.collection(db, 'products'), {
+            name: name,
+            price: parseInt(price),
+            description: description,
+            imageUrl: imageUrl,
+            sellerName: currentUser.displayName || currentUser.email,
+            sellerId: currentUser.uid,
+            createdAt: new Date()
+        });
+        
+        alert('제품이 등록되었습니다!');
+        closeAllModals();
+        
+        // 폼 초기화
+        document.getElementById('productImage').value = '';
+        document.getElementById('productName').value = '';
+        document.getElementById('productPrice').value = '';
+        document.getElementById('productDescription').value = '';
+        document.getElementById('imagePreview').innerHTML = '';
+        selectedImage = null;
+        
+        // 제품 목록 새로고침
+        loadProducts();
+        
+    } catch (error) {
+        console.error('제품 등록 실패:', error);
+        alert('제품 등록에 실패했습니다: ' + error.message);
+    }
+}
+
+// 제품 목록 로드
+async function loadProducts() {
+    console.log('loadProducts 시작');
+    console.log('db 객체:', db);
+    console.log('currentUser:', currentUser);
+    
+    if (!db) {
+        console.error('db가 초기화되지 않음');
+        return;
+    }
+    
+    try {
+        console.log('Firestore에서 데이터 가져오기 시도...');
+        
+        const querySnapshot = await window.firebase.getDocs(
+            window.firebase.collection(db, 'products')
+        );
+        
+        console.log('데이터 가져오기 성공! 문서 수:', querySnapshot.size);
+        
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        
+        const products = [];
+        querySnapshot.forEach((doc) => {
+            console.log('문서 ID:', doc.id, '데이터:', doc.data());
+            products.push(doc.data());
+        });
+        
+        // JavaScript에서 정렬 (최신순)
+        products.sort((a, b) => {
+            const timeA = a.createdAt?.toDate?.() || new Date(0);
+            const timeB = b.createdAt?.toDate?.() || new Date(0);
+            return timeB - timeA;
+        });
+        
+        // 카드 생성
+        products.forEach((product) => {
+            const card = createProductCard(product);
+            container.appendChild(card);
+        });
+        
+        if (products.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-size: 20px; padding: 40px;">등록된 제품이 없습니다.</p>';
+        }
+        
+    } catch (error) {
+        console.error('제품 목록 로드 실패:', error);
+        console.error('에러 코드:', error.code);
+        console.error('에러 메시지:', error.message);
+        console.error('전체 에러 객체:', error);
+        
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = `
+            <p style="grid-column: 1/-1; text-align: center; font-size: 20px; padding: 40px; color: red;">
+                제품 목록을 불러오는데 실패했습니다.<br>
+                에러: ${error.message}<br>
+                코드: ${error.code}
+            </p>
+        `;
+    }
+}
+
+// 제품 카드 생성
+function createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    const imageUrl = product.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
+    
+    card.innerHTML = `
+        <div class="title-box">
+            <img src="${imageUrl}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300?text=Image+Error'">
+        </div>
+        <div class="info-box">${product.name} / ${product.price.toLocaleString()}원</div>
+        <div class="description-box">${product.description}</div>
+    `;
+    
+    return card;
+}
+
+// Enter 키 이벤트
+document.addEventListener('DOMContentLoaded', () => {
+    const loginPassword = document.getElementById('loginPassword');
+    if (loginPassword) {
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+    }
+    
+    const signupPassword = document.getElementById('signupPassword');
+    if (signupPassword) {
+        signupPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSignupNext();
+        });
+    }
+
+    const nickname = document.getElementById('nickname');
+    if (nickname) {
+        nickname.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSignupComplete();
+        });
+    }
+
+    const productImage = document.getElementById('productImage');
+    if (productImage) {
+        productImage.addEventListener('change', handleImageSelect);
+    }
+});
+
+// Firebase 초기화 시작
+waitForFirebaseInit();
