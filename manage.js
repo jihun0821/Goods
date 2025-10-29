@@ -163,6 +163,7 @@ async function loadPurchases() {
                 totalPrice: Number(d.totalPrice || (d.productPrice ? d.productPrice * (d.quantity || 1) : 0)),
                 productImageUrl: d.productImageUrl || d.imageUrl || (d.product && d.product.imageUrl) || '',
                 selectedSize: d.selectedSize || '',
+                selectedSizePrice: d.selectedSizePrice || d.productPrice || d.price || 0,                
                 sellerName: d.sellerName || '',
                 purchaseDate: purchaseDate || new Date(),
                 raw: d
@@ -348,14 +349,34 @@ function renderTable() {
 function computeAggregatesAndRender() {
     // product aggregates: { productName: { qty, total } }
     const prodAgg = {};
+    const uniformAgg = {}; // 유니폼 사이즈별 aggregate
+
     filtered.forEach(p => {
         const name = p.productName || '__unknown';
         if (!prodAgg[name]) prodAgg[name] = { productName: name, qty: 0, total: 0 };
         prodAgg[name].qty += (Number(p.quantity) || 0);
         prodAgg[name].total += (Number(p.totalPrice) || 0);
+
+        // 유니폼 사이즈별 집계
+        if (name.includes('유니폼') && p.selectedSize) {
+            if (!uniformAgg[p.selectedSize]) uniformAgg[p.selectedSize] = { size: p.selectedSize, qty: 0, total: 0 };
+            uniformAgg[p.selectedSize].qty += (Number(p.quantity) || 0);
+            uniformAgg[p.selectedSize].total += (Number(p.totalPrice) || 0);
+        }
     });
+
     const prodList = Object.values(prodAgg).sort((a,b) => b.qty - a.qty);
     renderProductSummary(prodList);
+
+    // 유니폼 사이즈별 summary 렌더링 (요약 박스 아래에 추가)
+    if (Object.keys(uniformAgg).length > 0) {
+      const el = document.getElementById('productSummaryList');
+      const html = `<div style="margin-top:16px; font-weight:bold;">유니폼 사이즈별 집계</div>` +
+        Object.values(uniformAgg).map(u =>
+          `<div class="summary-item"><div>${escapeHtml(u.size)}</div><div>${escapeHtml(String(u.qty))}개 / ${escapeHtml(String(u.total.toLocaleString()))}원</div></div>`
+        ).join('');
+      el.innerHTML += html;
+    }
 
     // group aggregates: depends on groupBy selection
     const groupBy = document.getElementById('groupBy') ? document.getElementById('groupBy').value : 'none';
