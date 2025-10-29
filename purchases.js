@@ -179,7 +179,7 @@ function createPurchaseCard(docId, purchase) {
             <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(purchase.productName)}" onerror="this.src='https://via.placeholder.com/300?text=Image+Error'">
         </div>
         <div class="info-box">${escapeHtml(String(purchase.productName))}</div>
-        <div class="info-box">수량: ${Number(purchase.quantity)}개 / ${Number(purchase.totalPrice).toLocaleString()}원</div>
+        <div class="info-box">수량: ${Number(purchase.quantity)}개 / ${Number(purchase.selectedSizePrice || purchase.productPrice).toLocaleString()}원(개당) / ${(Number(purchase.totalPrice)).toLocaleString()}원(합계)</div>
         ${sizeHtml}
         <div class="info-box">판매자: ${escapeHtml(String(purchase.sellerName || ''))}</div>
         <div class="description-box">구매일시: ${escapeHtml(formattedDate)}</div>
