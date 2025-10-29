@@ -105,6 +105,20 @@ function openProductModal() {
         sizesInput.value = '';
         sizesInput.style.display = 'none';
     }
+
+    if (productHasSize && productSizePrices) {
+      productHasSize.addEventListener('change', () => {
+    if (productHasSize.checked) {
+      productSizes.style.display = 'block';
+      productSizePrices.style.display = 'block';
+    } else {
+      productSizes.value = '';
+      productSizes.style.display = 'none';
+      productSizePrices.value = '';
+      productSizePrices.style.display = 'none';
+    }
+  });
+}
 }
 
 // 개인정보 입력 모달 열기 및 기존 값 불러오기
@@ -159,14 +173,31 @@ function openDetailModal(product) {
     if (existingWrapper) existingWrapper.remove();
 
     if (product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0) {
+        const sizePrices = product.sizePrices || {};
         const wrapper = document.createElement('div');
         wrapper.id = 'purchaseSizeWrapper';
         wrapper.className = 'select-group';
-        const optionsHtml = product.sizes.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-        wrapper.innerHTML = `<label>사이즈</label><select id="purchaseSize" class="privacy-select">${optionsHtml}</select>`;
-        // insert before quantity selector so size appears above quantity
+        const optionsHtml = product.sizes.map(s => {
+          const price = sizePrices[s] ? ` (${sizePrices[s].toLocaleString()}원)` : '';
+          return `<option value="${escapeHtml(s)}">${escapeHtml(s)}${price}</option>`;
+        }).join('');
+        wrapper.innerHTML = `<label>사이즈</label><select id="purchaseSize" class="privacy-select">${optionsHtml}</select><span id="selectedSizePrice"></span>`;
         const qtySelector = purchaseSection.querySelector('.quantity-selector');
         purchaseSection.insertBefore(wrapper, qtySelector);
+
+        // 선택시 가격 표시
+        const select = wrapper.querySelector('#purchaseSize');
+        const priceSpan = wrapper.querySelector('#selectedSizePrice');
+        function updateSizePrice() {
+          const val = select.value;
+          if (sizePrices[val]) {
+            priceSpan.textContent = ` → ${sizePrices[val].toLocaleString()}원`;
+          } else {
+            priceSpan.textContent = '';
+          }
+        }
+        select.addEventListener('change', updateSizePrice);
+        updateSizePrice();
     }
 
     closeAllModals();
@@ -213,22 +244,25 @@ async function handlePurchase() {
     }
 
     // 선택된 사이즈가 있으면 가져오기
-    const sizeSelect = document.getElementById('purchaseSize');
-    const selectedSize = sizeSelect ? sizeSelect.value : null;
-    
-    try {
-        // purchases 컬렉션에 구매 정보 저장 (사이즈 포함)
+        const sizeSelect = document.getElementById('purchaseSize');
+        const selectedSize = sizeSelect ? sizeSelect.value : null;
+        let selectedSizePrice = currentProductDetail.price;
+        if (selectedSize && currentProductDetail.sizePrices && currentProductDetail.sizePrices[selectedSize]) {
+          selectedSizePrice = currentProductDetail.sizePrices[selectedSize];
+        }
+        const totalPrice = selectedSizePrice * quantity;
         await window.firebase.addDoc(window.firebase.collection(db, 'purchases'), {
             productName: currentProductDetail.name,
-            productPrice: currentProductDetail.price,
+            productPrice: selectedSizePrice,
             quantity: quantity,
-            totalPrice: currentProductDetail.price * quantity,
+            totalPrice: totalPrice,
             buyerName: currentUser.displayName || currentUser.email,
             buyerId: currentUser.uid,
             sellerName: currentProductDetail.sellerName,
             sellerId: currentProductDetail.sellerId,
             productImageUrl: currentProductDetail.imageUrl,
             selectedSize: selectedSize || '',
+            selectedSizePrice: selectedSizePrice,
             purchaseDate: new Date(),
             createdAt: new Date()
         });
@@ -484,12 +518,24 @@ async function handleProductSubmit() {
         // 사이즈 옵션 처리 (콤마로 구분)
         const hasSize = document.getElementById('productHasSize')?.checked;
         const sizesRaw = document.getElementById('productSizes')?.value || '';
+        const sizePricesRaw = document.getElementById('productSizePrices')?.value || '';
+
         let sizesArray = [];
+        let sizePricesObj = {};
         if (hasSize && sizesRaw.trim()) {
             sizesArray = sizesRaw.split(',').map(s => s.trim()).filter(Boolean);
+            // 사이즈별 가격 파싱 (ex: 250:30000,255:31000)
+            if (sizePricesRaw.trim()) {
+              sizePricesRaw.split(',').forEach(pair => {
+                const [size, price] = pair.split(':').map(x => x.trim());
+                if (size && price && !isNaN(price)) {
+                  sizePricesObj[size] = parseInt(price, 10);
+                }
+              });
+            }
         }
 
-        // Firestore에 제품 정보 저장 (sizes 필드 추가)
+        // Firestore에 제품 정보 저장 (sizePrices 필드 추가)
         await window.firebase.addDoc(window.firebase.collection(db, 'products'), {
             name: name,
             price: parseInt(price),
@@ -498,6 +544,7 @@ async function handleProductSubmit() {
             sellerName: currentUser.displayName || currentUser.email,
             sellerId: currentUser.uid,
             sizes: sizesArray,
+            sizePrices: sizePricesObj,
             createdAt: new Date()
         });
         
@@ -649,7 +696,9 @@ function createProductCard(product) {
     const imageUrl = product.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
     
     // 사이즈 정보 간단히 표시 (있을 경우)
-    const sizesInfo = (product.sizes && product.sizes.length) ? ` / 사이즈: ${product.sizes.join(',')}` : '';
+    const sizesInfo = (product.sizes && product.sizes.length)
+      ? ` / 사이즈: ${product.sizes.map(s => product.sizePrices && product.sizePrices[s] ? `${s}(${product.sizePrices[s].toLocaleString()}원)` : s).join(', ')}`
+      : '';
     
     card.innerHTML = `
         <div class="title-box">
