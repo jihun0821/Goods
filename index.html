@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이트 이름</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script type="module">
+      import {
+        initializeApp
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  
+      import {
+        getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+        signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail 
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+      import {
+        getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+      import {
+        getStorage, ref, uploadBytes, getDownloadURL
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+      window.firebase = {
+        initializeApp,
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+        sendPasswordResetEmail,
+        updateProfile,
+        getFirestore,
+        doc,
+        setDoc,
+        getDoc,
+        collection,
+        addDoc,
+        getDocs,
+        query,
+        orderBy,
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL
+      };
+    </script>
+</head>
+<body>
+    <!-- 메뉴 버튼 -->
+    <div class="menu-button" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <h2>사이트 이름</h2>
+            <div class="login-box" onclick="openProductModal()">제품 등록하기</div>
+            <div class="login-box" id="loginButton" onclick="openLoginModal()">LOGIN</div>
+        </div>
+        
+        <div class="sidebar-section">
+            <h2>회원 정보</h2>
+            <ul class="option-list">
+                <li id="userInfo">- 로그인이 필요합니다</li>
+                <li style="cursor: pointer;" onclick="location.href='list.html'">- 내 구매목록</li>
+                <li>- 사이트 설명</li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <ul class="option-list">
+              <li style="cursor: pointer;" onclick="location.href='manage.html'">- 관리 페이지</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <!-- 카드 섹션 -->
+        <div class="cards-section">
+            <div class="cards-container" id="cardsContainer">
+                <!-- 제품 카드들이 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그인 모달 -->
+    <div id="loginModal" class="auth-modal">
+       <div class="auth-modal-content">
+         <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+         <h2>로그인</h2>
+         <div class="auth-form">
+           <input id="loginEmail" type="email" placeholder="아이디(이메일)" autocomplete="username" />
+           <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password" />
+           <button onclick="handleLogin()" class="auth-btn">로그인</button>
+         </div>
+        <div class="auth-links">
+          <a onclick="openSignupModal()">가입하기</a>
+          <a onclick="openPasswordResetModal()">비밀번호를 잊어버리셨나요?</a>
+        </div>
+       </div>
+    </div>
+
+    <!-- 회원가입 모달 -->
+    <div id="signupModal" class="auth-modal">
+       <div class="auth-modal-content">
+         <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+         <h2>회원가입</h2>
+         <div class="auth-form">
+           <input id="signupEmail" type="email" placeholder="이메일 (@hanilgo.cnehs.kr)" />
+           <input id="signupPassword" type="password" placeholder="비밀번호 (6자 이상)" />
+           <button onclick="handleSignupNext()" class="auth-btn">다음</button>
+         </div>
+         <div class="auth-links">
+           <a onclick="openLoginModal()">로그인으로 돌아가기</a>
+         </div>
+       </div>
+    </div>
+
+    <!-- 프로필 설정 모달 (회원가입 완료용) -->
+    <div id="profileModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+            <h2>프로필 설정</h2>
+            <div class="auth-form">
+                <p>닉네임을 설정해주세요. (2-20자)</p>
+                <input id="nickname" type="text" placeholder="닉네임 입력" maxlength="20" />
+                <button onclick="handleSignupComplete()" class="auth-btn">저장하고 가입</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비밀번호 재설정 모달 -->
+    <div id="passwordResetModal" class="auth-modal">
+      <div class="auth-modal-content">
+        <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+        <h2>비밀번호 재설정</h2>
+        <div class="auth-form">
+          <p>가입할 때 사용한 이메일 주소를 입력하면 비밀번호 재설정 링크를 보내드립니다.</p>
+          <input id="resetEmail" type="email" placeholder="이메일 주소 입력" />
+          <button onclick="handlePasswordReset()" class="auth-btn">비밀번호 재설정 이메일 보내기</button>
+        </div>
+        <div class="auth-links">
+          <a onclick="openLoginModal()">로그인으로 돌아가기</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 제품 등록 모달 -->
+    <div id="productModal" class="auth-modal">
+      <div class="auth-modal-content">
+        <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+        <h2>제품 등록</h2>
+        <div class="auth-form">
+          <input id="productImage" type="file" accept="image/*" class="file-input" />
+          <div id="imagePreview" class="image-preview"></div>
+          <input id="productName" type="text" placeholder="제품 이름" />
+          <input id="productPrice" type="number" placeholder="가격 (원)" min="0" />
+          <textarea id="productDescription" placeholder="제품 설명" rows="4"></textarea>
+
+          <!-- 사이즈 옵션 추가 -->
+          <div class="checkbox-group">
+            <label><input id="productHasSize" type="checkbox" /> 사이즈 옵션 설정</label>
+          </div>
+          <input id="productSizes" type="text" placeholder="예: S,M,L 또는 250,255 (콤마로 구분)" class="product-size-input" style="display:none;" />
+
+          <button onclick="handleProductSubmit()" class="auth-btn">제품 등록하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 제품 상세 모달 -->
+    <div id="detailModal" class="auth-modal">
+      <div class="auth-modal-content detail-modal-content">
+        <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+        <h2 id="detailProductName">제품 이름</h2>
+        <div class="detail-content">
+          <div class="detail-image-box">
+            <img id="detailProductImage" src="" alt="제품 이미지">
+          </div>
+          <div class="detail-info">
+            <div class="detail-price-box">
+              <span class="detail-label">가격:</span>
+              <span id="detailProductPrice" class="detail-price">0원</span>
+            </div>
+            <div class="detail-description-box">
+              <span class="detail-label">설명:</span>
+              <p id="detailProductDescription"></p>
+            </div>
+            <div class="detail-seller-box">
+              <span class="detail-label">판매자:</span>
+              <span id="detailSellerName"></span>
+            </div>
+            <div class="purchase-section">
+              <!-- 사이즈 셀렉트는 script에서 동적으로 추가됩니다 (id="purchaseSizeWrapper") -->
+              <div class="quantity-selector">
+                <button onclick="decreaseQuantity()" class="quantity-btn">-</button>
+                <input id="purchaseQuantity" type="number" value="1" min="1" max="99" readonly />
+                <button onclick="increaseQuantity()" class="quantity-btn">+</button>
+              </div>
+              <button onclick="handlePurchase()" class="auth-btn purchase-btn">구매하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!-- 개인정보 입력 모달 -->
+    <div id="privacyModal" class="auth-modal">
+      <div class="auth-modal-content">
+        <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+        <h2>개인정보 입력</h2>
+        <div class="auth-form">
+          <p>개인정보를 입력해주세요.</p>
+          <div class="select-group">
+            <label>학년</label>
+            <select id="privacyGrade" class="privacy-select">
+              <option value="">선택</option>
+              <option value="1">1학년</option>
+              <option value="2">2학년</option>
+              <option value="3">3학년</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label>반</label>
+            <select id="privacyClass" class="privacy-select">
+              <option value="">선택</option>
+              <option value="1">1반</option>
+              <option value="2">2반</option>
+              <option value="3">3반</option>
+              <option value="4">4반</option>
+              <option value="5">5반</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label>번호</label>
+            <select id="privacyNumber" class="privacy-select">
+              <option value="">선택</option>
+              <option value="1">1번</option>
+              <option value="2">2번</option>
+              <option value="3">3번</option>
+              <option value="4">4번</option>
+              <option value="5">5번</option>
+              <option value="6">6번</option>
+              <option value="7">7번</option>
+              <option value="8">8번</option>
+              <option value="9">9번</option>
+              <option value="10">10번</option>
+              <option value="11">11번</option>
+              <option value="12">12번</option>
+              <option value="13">13번</option>
+              <option value="14">14번</option>
+              <option value="15">15번</option>
+              <option value="16">16번</option>
+              <option value="17">17번</option>
+              <option value="18">18번</option>
+              <option value="19">19번</option>
+              <option value="20">20번</option>
+              <option value="21">21번</option>
+              <option value="22">22번</option>
+              <option value="23">23번</option>
+              <option value="24">24번</option>
+              <option value="25">25번</option>
+              <option value="26">26번</option>
+            </select>
+          </div>
+          <input id="privacyName" type="text" placeholder="이름 입력" maxlength="10" />
+          <button onclick="handlePrivacySave()" class="auth-btn">저장하기</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
