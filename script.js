@@ -408,12 +408,14 @@ function updateUI(user) {
     }
 }
 
-// 인증 상태 감지
+// 인증 상태 감지(수정) 
 function setupAuthListener() {
     window.firebase.onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log('사용자 로그인됨:', user.email);
             updateUI(user);
+            // 최초 로그인 또는 새로고침 시 privacy 체크
+            showPrivacyModalIfNeeded(user);
         } else {
             console.log('사용자 로그아웃됨');
             updateUI(null);
@@ -710,6 +712,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// 로그인될 때 privacy 모달 자동 오픈
+function showPrivacyModalIfNeeded(user) {
+    if (!user) return;
+    // 로그인된 경우 privacy 컬렉션에서 개인정보 존재 여부 확인
+    const privacyDocRef = window.firebase.doc(db, 'privacy', user.uid);
+    window.firebase.getDoc(privacyDocRef)
+        .then((docSnap) => {
+            if (!docSnap.exists()) {
+                // 개인정보 문서가 없으면 모달 자동 오픈
+                openPrivacyModal();
+            }
+        })
+        .catch((err) => {
+            console.error('privacy 데이터 확인 에러', err);
+        });
+}
 
 // Firebase 초기화 시작
 waitForFirebaseInit();
