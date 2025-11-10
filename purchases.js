@@ -73,7 +73,7 @@ function updateUI(user) {
         loginButton.onclick = logout;
 
         const displayNameOrEmail = user.displayName || user.email;
-        userInfo.innerHTML = `- <span id="userNickname" style="text-decoration: underline; color: #27AE60; cursor: pointer;">${escapeHtml(displayNameOrEmail)}</span>`;
+        userInfo.innerHTML = `- <span id="userNickname" style="cursor:pointer;">${escapeHtml(displayNameOrEmail)}</span>`;
         const nicknameSpan = document.getElementById('userNickname');
         if (nicknameSpan) {
             nicknameSpan.addEventListener('click', (e) => {
