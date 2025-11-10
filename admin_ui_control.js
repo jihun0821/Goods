@@ -13,14 +13,33 @@ async function isAdminUser(email) {
         console.error("Firestore DB 접근 불가 - Firebase 초기화 필요");
         return false;
     }
-    // 점검용 로그: 어떤 이메일로 체크하는지 찍기
-    console.log("[ADMIN CHECK] 체크할 이메일:", email);
 
+    // DB 인스턴스 정보 확인
+    console.log("[ADMIN CHECK] DB 인스턴스 app name:", db.app.name);
+    if (db.app.options) {
+        console.log("[ADMIN CHECK] DB projectId:", db.app.options.projectId);
+    }
+
+    // 이 값으로 체크함(값, 길이)
+    console.log("[ADMIN CHECK] 체크할 이메일:", `"${email}"`, "(length:", email.length, ")");
     const adminDocRef = window.firebase.doc(db, "admins", email);
-    console.log("[ADMIN CHECK] Firestore admins 컬렉션 문서ID:", adminDocRef.id);
+    console.log("[ADMIN CHECK] Firestore admins 컬렉션 문서ID:", `"${adminDocRef.id}"`, "(length:", adminDocRef.id.length, ")");
 
-    const adminDocSnap = await window.firebase.getDoc(adminDocRef);
-    console.log("[ADMIN CHECK] Firestore admins 문서 존재 여부 (exists):", adminDocSnap.exists());
+    let adminDocSnap;
+    try {
+        adminDocSnap = await window.firebase.getDoc(adminDocRef);
+        console.log("[ADMIN CHECK] Firestore admins 문서 존재 여부 (exists):", adminDocSnap.exists());
+        if (!adminDocSnap.exists()) {
+            console.warn(`[ADMIN CHECK][WARNING] Firestore admins 문서를 찾지 못함! 이메일/문서ID 완전일치 필요,
+              email: "${email}"
+              docId: "${adminDocRef.id}"
+              길이(이메일): ${email.length}, 길이(docId): ${adminDocRef.id.length}
+              값이 완전히 같은지, 공백/오타 여부 반드시 재확인!`);
+        }
+    } catch (e) {
+        console.error("[ADMIN CHECK] Firestore getDoc 에러:", e);
+        return false;
+    }
 
     return adminDocSnap.exists();
 }
@@ -44,7 +63,7 @@ async function adminUIAuthWatcher() {
     const auth = window.firebase.getAuth();
     window.firebase.onAuthStateChanged(auth, async (user) => {
         if (user && user.email) {
-            console.log("[ADMIN CHECK] 현재 로그인된 user.email:", user.email);
+            console.log("[ADMIN CHECK] 현재 로그인된 user.email:", `"${user.email}"`, "(length:", user.email.length, ")");
             const admin = await isAdminUser(user.email);
             setAdminVisibility(admin);
         } else {
