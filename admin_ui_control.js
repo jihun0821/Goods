@@ -4,7 +4,6 @@
 // (1) 관리자 권한 판단 함수
 async function isAdminUser(email) {
     let db;
-    // window.db는 index.html에서 이미 생성 및 전역 할당되어 있음
     if (window.db) {
         db = window.db;
         console.log("[ADMIN CHECK] window.db 인스턴스에서 db 확보.");
@@ -23,12 +22,10 @@ async function isAdminUser(email) {
         console.log("[ADMIN CHECK] DB projectId:", db.app.options.projectId);
     }
 
-    // 체크할 이메일 값, 길이
     console.log("[ADMIN CHECK] 체크할 이메일:", `"${email}"`, "(length:", email.length, ")");
     const adminDocRef = window.firebase.doc(db, "admins", email);
     console.log("[ADMIN CHECK] Firestore admins 컬렉션 문서ID:", `"${adminDocRef.id}"`, "(length:", adminDocRef.id.length, ")");
 
-    // (1-1) admins 컬렉션 전체 문서 리스트
     try {
         const adminsCollection = window.firebase.collection(db, "admins");
         const allAdminDocs = await window.firebase.getDocs(adminsCollection);
@@ -49,9 +46,7 @@ async function isAdminUser(email) {
     } catch (err) {
         console.error("[ADMIN CHECK] admins 컬렉션 전체 로드 실패:", err);
     }
-    // --------------------------------------------------------
 
-    // (1-2) 단일 문서 존재 여부
     let adminDocSnap;
     try {
         adminDocSnap = await window.firebase.getDoc(adminDocRef);
@@ -82,7 +77,6 @@ function setAdminVisibility(isAdmin) {
     if (manageSection) {
         manageSection.style.display = isAdmin ? "list-item" : "none";
     }
-    // 추가 로그: 실제 무엇이 보이나
     console.log(`[ADMIN CHECK] setAdminVisibility: isAdmin = ${isAdmin}`);
 }
 
@@ -107,20 +101,6 @@ async function adminUIAuthWatcher() {
     });
 }
 
-// (4) DOMContentLoaded에서 Firebase, db 초기화 확실히 체크 후 실행
-document.addEventListener('DOMContentLoaded', () => {
-    setAdminVisibility(false);
-    const tryAdminUIWatcher = () => {
-        if (window.firebase && window.firebase.getAuth && window.db) {
-            console.log("[ADMIN CHECK] tryAdminUIWatcher: firebase, getAuth, db 모두 준비됨! -> adminUIAuthWatcher 호출");
-            adminUIAuthWatcher();
-        } else {
-            // 준비 안되었을 때 로깅
-            if (!window.firebase) console.log("[ADMIN CHECK] window.firebase가 없음!");
-            if (!window.firebase?.getAuth) console.log("[ADMIN CHECK] window.firebase.getAuth가 없음!");
-            if (!window.db) console.log("[ADMIN CHECK] window.db가 없음!");
-            setTimeout(tryAdminUIWatcher, 100); // 0.1초 후 다시
-        }
-    };
-    tryAdminUIWatcher();
-});
+// (4) 수동 초기화 외부에서 직접 해주기! (자동실행 없음)
+window.adminUIAuthWatcher = adminUIAuthWatcher;
+window.setAdminVisibility = setAdminVisibility;
