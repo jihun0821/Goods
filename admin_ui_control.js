@@ -25,6 +25,31 @@ async function isAdminUser(email) {
     const adminDocRef = window.firebase.doc(db, "admins", email);
     console.log("[ADMIN CHECK] Firestore admins 컬렉션 문서ID:", `"${adminDocRef.id}"`, "(length:", adminDocRef.id.length, ")");
 
+    // ---- [여기에 Firestore admins 전체 문서 리스트 디버깅용 추가] ----
+    // admins 컬렉션 내 모든 문서 ID와 길이 로그로 찍어서 존재여부 명확하게 비교
+    try {
+        const adminsCollection = window.firebase.collection(db, "admins");
+        const allAdminDocs = await window.firebase.getDocs(adminsCollection);
+        let found = false;
+        allAdminDocs.forEach((doc) => {
+            console.log(
+                "[ADMIN CHECK][COLLECTION LIST] 문서ID:",
+                `"${doc.id}"`,
+                "(length:", doc.id.length, ")"
+            );
+            if (doc.id === email) found = true;
+        });
+        if (!found) {
+            console.warn("[ADMIN CHECK][COLLECTION LIST] admins 컬렉션에 해당 이메일과 완벽히 일치하는 문서ID가 없습니다.");
+        } else {
+            console.log("[ADMIN CHECK][COLLECTION LIST] 이메일과 일치하는 문서ID가 admins 컬렉션에 존재합니다!");
+        }
+    } catch (err) {
+        console.error("[ADMIN CHECK] admins 컬렉션 전체 로드 실패:", err);
+    }
+    // --------------------------------------------------------
+
+
     let adminDocSnap;
     try {
         adminDocSnap = await window.firebase.getDoc(adminDocRef);
