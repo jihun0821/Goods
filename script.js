@@ -392,7 +392,7 @@ function updateUI(user) {
         // Make the user info clickable to open privacy modal
         // We show "- 닉네임" but make the nickname portion clickable
         const displayNameOrEmail = user.displayName || user.email;
-        userInfo.innerHTML = `- <span id="userNickname" style="text-decoration: underline; color: #27AE60; cursor: pointer;">${escapeHtml(displayNameOrEmail)}</span>`;
+        userInfo.innerHTML = `- <span id="userNickname" cursor: pointer;">${escapeHtml(displayNameOrEmail)}</span>`;
         const nicknameSpan = document.getElementById('userNickname');
         if (nicknameSpan) {
             nicknameSpan.addEventListener('click', (e) => {
