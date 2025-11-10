@@ -7,6 +7,70 @@
     <link rel="icon" href="images/favicon.png"/> 
     <link rel="stylesheet" href="styles.css">
     
+    <style>
+        /* 음악 플레이어 스타일 */
+        .music-player {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .music-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .music-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .music-btn:active {
+            transform: translateY(0);
+        }
+        
+        .now-playing {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+            min-height: 16px;
+            word-break: break-all;
+        }
+        
+        .music-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .control-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+    
     <script type="module">
       import {
         initializeApp
@@ -81,6 +145,16 @@
         <div class="sidebar-section">
             <ul class="option-list">
               <li style="cursor: pointer;" onclick="location.href='manage.html'">- 관리 페이지</li>
+              <li style="margin-top: 15px;">
+                <div class="music-player">
+                  <button id="playBtn" class="music-btn">▶ 음악 재생</button>
+                  <div class="music-controls">
+                      <button id="pauseBtn" class="control-btn">⏸ 일시정지</button>
+                      <button id="nextBtn" class="control-btn">⏭ 다음곡</button>
+                  </div>
+                  <div id="nowPlaying" class="now-playing"></div>
+                </div>
+              </li>
             </ul>
         </div>
     </div>
@@ -216,7 +290,7 @@
       </div>
     </div>
 
-      <!-- 개인정보 입력 모달 -->
+    <!-- 개인정보 입력 모달 -->
     <div id="privacyModal" class="auth-modal">
       <div class="auth-modal-content">
         <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
@@ -283,5 +357,90 @@
 
     <script src="script.js"></script>
     <script src="admin_ui_control.js"></script>
+    
+    <!-- 🎵 음악 플레이어 스크립트 -->
+    <script>
+      // GitHub의 MP3 파일 경로를 여기에 추가하세요
+      const songs = [
+        "music/song1.mp3",
+        "music/song2.mp3",
+        "music/song3.mp3",
+        "music/song4.mp3"
+        // 여기에 GitHub URL로 변경하거나 추가하세요
+      ];
+
+      let remaining = [...songs];
+      let audio = new Audio();
+      let isPlaying = false;
+
+      const playBtn = document.getElementById("playBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const nowPlaying = document.getElementById("nowPlaying");
+
+      function updateNowPlaying(songPath) {
+        const songName = songPath.split('/').pop().replace('.mp3', '');
+        nowPlaying.textContent = `재생중: ${songName}`;
+      }
+
+      function playRandomSong() {
+        if (remaining.length === 0) {
+          nowPlaying.textContent = "모든 노래를 재생했습니다!";
+          remaining = [...songs];
+          isPlaying = false;
+          playBtn.textContent = "▶ 음악 재생";
+          return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * remaining.length);
+        const selected = remaining[randomIndex];
+        remaining.splice(randomIndex, 1);
+
+        audio.src = selected;
+        audio.play().catch(err => {
+          console.error("재생 오류:", err);
+          nowPlaying.textContent = "재생 오류 발생";
+        });
+        
+        updateNowPlaying(selected);
+        isPlaying = true;
+        playBtn.textContent = "⏹ 정지";
+
+        audio.onended = playRandomSong;
+      }
+
+      playBtn.addEventListener("click", () => {
+        if (!isPlaying) {
+          playRandomSong();
+        } else {
+          audio.pause();
+          audio.currentTime = 0;
+          isPlaying = false;
+          playBtn.textContent = "▶ 음악 재생";
+          nowPlaying.textContent = "";
+          remaining = [...songs];
+        }
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        if (isPlaying) {
+          if (audio.paused) {
+            audio.play();
+            pauseBtn.textContent = "⏸ 일시정지";
+          } else {
+            audio.pause();
+            pauseBtn.textContent = "▶ 재생";
+          }
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (isPlaying) {
+          audio.pause();
+          playRandomSong();
+          pauseBtn.textContent = "⏸ 일시정지";
+        }
+      });
+    </script>
 </body>
 </html>
