@@ -29,6 +29,8 @@ body {
     transition: left 0.4s ease;
     z-index: 100;
     box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+    overflow-y: scroll;
+    scroll-behavior: smooth;
 }
 
 .sidebar.active {
