@@ -21,11 +21,19 @@ function initializeFirebase() {
         
         // goods 데이터베이스를 명시적으로 지정
         db = window.firebase.getFirestore(app, 'goods');
-        
+        window.db = db; // Ensure window.db is set here
+
         auth = window.firebase.getAuth(app);
         storage = window.firebase.getStorage(app);
         console.log("Firebase 초기화 완료 (goods 데이터베이스)");
         setupAuthListener();
+
+        // --- 관리자 UI 체크 (window.adminUIAuthWatcher는 전역 함수로 내보내짐) ---
+        if (window.adminUIAuthWatcher) {
+            window.adminUIAuthWatcher();
+        }
+        // --------------------------------------------------------------------------
+
         return true;
     }
     return false;
