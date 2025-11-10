@@ -13,8 +13,15 @@ async function isAdminUser(email) {
         console.error("Firestore DB 접근 불가 - Firebase 초기화 필요");
         return false;
     }
+    // 점검용 로그: 어떤 이메일로 체크하는지 찍기
+    console.log("[ADMIN CHECK] 체크할 이메일:", email);
+
     const adminDocRef = window.firebase.doc(db, "admins", email);
+    console.log("[ADMIN CHECK] Firestore admins 컬렉션 문서ID:", adminDocRef.id);
+
     const adminDocSnap = await window.firebase.getDoc(adminDocRef);
+    console.log("[ADMIN CHECK] Firestore admins 문서 존재 여부 (exists):", adminDocSnap.exists());
+
     return adminDocSnap.exists();
 }
 
@@ -28,6 +35,8 @@ function setAdminVisibility(isAdmin) {
     if (manageSection) {
         manageSection.style.display = isAdmin ? "list-item" : "none";
     }
+    // 추가 로그: 실제 무엇이 보이나
+    console.log(`[ADMIN CHECK] setAdminVisibility: isAdmin = ${isAdmin}`);
 }
 
 async function adminUIAuthWatcher() {
@@ -35,9 +44,11 @@ async function adminUIAuthWatcher() {
     const auth = window.firebase.getAuth();
     window.firebase.onAuthStateChanged(auth, async (user) => {
         if (user && user.email) {
+            console.log("[ADMIN CHECK] 현재 로그인된 user.email:", user.email);
             const admin = await isAdminUser(user.email);
             setAdminVisibility(admin);
         } else {
+            console.log("[ADMIN CHECK] 비로그인 상태, 관리자 권한 없음 처리");
             setAdminVisibility(false);
         }
     });
