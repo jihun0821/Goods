@@ -54,7 +54,16 @@ async function adminUIAuthWatcher() {
     });
 }
 
+// DOMContentLoaded에서 Firebase, db가 초기화된 이후에만 adminUIAuthWatcher를 실행!
 document.addEventListener('DOMContentLoaded', () => {
     setAdminVisibility(false);
-    adminUIAuthWatcher();
+    // Firebase가 window에 초기화됐는지 확실히 체크 후 실행!
+    const tryAdminUIWatcher = () => {
+        if (window.firebase && window.firebase.getAuth && window.db) {
+            adminUIAuthWatcher();
+        } else {
+            setTimeout(tryAdminUIWatcher, 100); // 0.1초 후 다시
+        }
+    };
+    tryAdminUIWatcher();
 });
