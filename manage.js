@@ -346,42 +346,58 @@ function renderTable() {
 /* 집계 기능 */
 // filtered 데이터를 기준으로 제품별 합계 및 그룹별 합계 계산/렌더링
 function computeAggregatesAndRender() {
-    // product aggregates: { productName: { qty, total } }
+    // product aggregates: { productKey: { productName, size, qty, total } }
     const prodAgg = {};
     filtered.forEach(p => {
-        const name = p.productName || '__unknown';
-        if (!prodAgg[name]) prodAgg[name] = { productName: name, qty: 0, total: 0 };
-        prodAgg[name].qty += (Number(p.quantity) || 0);
-        prodAgg[name].total += (Number(p.totalPrice) || 0);
+        // 사이즈 키는 값이 있을 때만 붙임
+        const sizeLabel = p.selectedSize ? ` (${p.selectedSize})` : '';
+        const nameKey = `${p.productName || '__unknown'}${sizeLabel}`;
+        if (!prodAgg[nameKey]) prodAgg[nameKey] = { productName: p.productName || '__unknown', size: p.selectedSize || '', qty: 0, total: 0 };
+        prodAgg[nameKey].qty += (Number(p.quantity) || 0);
+        prodAgg[nameKey].total += (Number(p.totalPrice) || 0);
     });
-    const prodList = Object.values(prodAgg).sort((a,b) => b.qty - a.qty);
+    // 사이즈별 정렬: 수량 내림차순, 제품명 오름차순, 사이즈 오름차순
+    const prodList = Object.values(prodAgg).sort((a, b) => {
+        if (b.qty !== a.qty) return b.qty - a.qty;
+        if ((a.productName || '') !== (b.productName || '')) return (a.productName || '').localeCompare(b.productName || '');
+        return (a.size || '').localeCompare(b.size || '');
+    });
     renderProductSummary(prodList);
 
-    // group aggregates: depends on groupBy selection
+    // group aggregates: groupBy + (제품명, 사이즈)별로 집계
     const groupBy = document.getElementById('groupBy') ? document.getElementById('groupBy').value : 'none';
     const groupAgg = {}; // key -> { label, qty, total }
 
     filtered.forEach(p => {
-        let key, label;
+        let groupKey, groupLabel;
         if (groupBy === 'grade') {
-            key = p.grade ? `grade_${p.grade}` : 'grade_unknown';
-            label = p.grade ? `${p.grade}학년` : '알수없음';
+            groupKey = p.grade ? `grade_${p.grade}` : 'grade_unknown';
+            groupLabel = p.grade ? `${p.grade}학년` : '알수없음';
         } else if (groupBy === 'class') {
             const gr = p.grade || '?';
             const cl = p.class || '?';
-            key = `class_${gr}_${cl}`;
-            label = `${gr}학년 ${cl}반`;
+            groupKey = `class_${gr}_${cl}`;
+            groupLabel = `${gr}학년 ${cl}반`;
         } else {
-            key = 'all';
-            label = '전체';
+            groupKey = 'all';
+            groupLabel = '전체';
         }
+        // 제품명+사이즈별로 그룹 키 확장
+        const sizeLabel = p.selectedSize ? ` (${p.selectedSize})` : '';
+        const productKey = `${p.productName || '__unknown'}${sizeLabel}`;
+        const key = `${groupKey}|${productKey}`;
+        const label = `${groupLabel} - ${p.productName || '__unknown'}${sizeLabel}`;
         if (!groupAgg[key]) groupAgg[key] = { label, qty: 0, total: 0 };
         groupAgg[key].qty += (Number(p.quantity) || 0);
         groupAgg[key].total += (Number(p.totalPrice) || 0);
     });
 
-    // convert to list and sort by qty desc
-    const groupList = Object.values(groupAgg).sort((a,b) => b.qty - a.qty);
+    // convert to list and sort by 그룹명(오름차) → 제품명(오름차) → 사이즈(오름차)
+    const groupList = Object.values(groupAgg).sort((a, b) => {
+        if (a.label < b.label) return -1;
+        if (a.label > b.label) return 1;
+        return 0;
+    });
     renderGroupSummary(groupList);
 }
 
@@ -393,7 +409,9 @@ function renderProductSummary(list) {
         return;
     }
     el.innerHTML = list.map(item => {
-        return `<div class="summary-item"><div>${escapeHtml(item.productName)}</div><div>${escapeHtml(String(item.qty))}개 / ${escapeHtml(String(item.total.toLocaleString()))}원</div></div>`;
+        // 사이즈가 있으면 함께 표시
+        const sizeStr = item.size ? ` (${escapeHtml(item.size)})` : '';
+        return `<div class="summary-item"><div>${escapeHtml(item.productName)}${sizeStr}</div><div>${escapeHtml(String(item.qty))}개 / ${escapeHtml(String(item.total.toLocaleString()))}원</div></div>`;
     }).join('');
 }
 
