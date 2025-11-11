@@ -433,23 +433,14 @@
 
   // 🎵 로그인한 사용자만 자동 재생
   const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("로그인 상태 감지됨:", user.email);
-      // 자동 재생 (브라우저 정책상 음소거 상태로 시작)
-      audio.muted = true;
-      playRandomSong();
-      setTimeout(() => {
-        audio.muted = false;
-      }, 1000);
-    } else {
-      console.log("로그아웃 상태 — 음악 재생 안 함");
-      audio.pause();
-      isPlaying = false;
-      playBtn.textContent = "▶ 음악 재생";
-      nowPlaying.textContent = "";
-    }
-  });
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.addEventListener("click", () => {
+      if (!isPlaying) playRandomSong();
+    }, { once: true });
+  }
+});
+
 </script>
 
 
