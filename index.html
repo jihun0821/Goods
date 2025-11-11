@@ -431,22 +431,28 @@
     }
   });
 
-  // 🎵 로그인한 사용자만 자동 재생
+// 🎵 로그인한 사용자만 자동 재생
   const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("로그인 상태 감지됨:", user.email);
-        audio.muted = true;        // 🔇 처음엔 음소거
-        playRandomSong();
-
-        // 🔈 첫 클릭 시 소리 켜기
-        const unmuteOnce = () => {
+  let autoPlayPending = false;
+  
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("로그인 상태 감지됨:", user.email);
+      autoPlayPending = true;
+      
+      // 🔈 첫 클릭 시 음악 시작
+      const startMusicOnClick = () => {
+        if (autoPlayPending && !isPlaying) {
           audio.muted = false;
-          window.removeEventListener("click", unmuteOnce);
-        };
-        window.addEventListener("click", unmuteOnce, { once: true });
-      }
-    });
+          playRandomSong();
+          autoPlayPending = false;
+        }
+        document.removeEventListener("click", startMusicOnClick);
+      };
+      
+      document.addEventListener("click", startMusicOnClick, { once: true });
+    }
+  });
 </script>
 
 
