@@ -361,7 +361,11 @@
     <script src="admin_ui_control.js"></script>
     
     <!-- 🎵 음악 플레이어 스크립트 -->
-<script>
+<script type="module">
+  import {
+    getAuth, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
   const songs = [
     "images/NMIXX_Blue Valentine.mp3",
     "images/NMIXX_Crush On You.mp3",
@@ -396,8 +400,8 @@
 
     audio.src = selected;
     audio.play().catch(err => {
-      console.error("재생 오류:", err);
-      nowPlaying.textContent = "재생 오류 발생";
+      console.warn("자동 재생 차단됨:", err);
+      nowPlaying.textContent = "브라우저가 자동재생을 차단했습니다.";
     });
 
     updateNowPlaying(selected);
@@ -426,7 +430,28 @@
       playRandomSong();
     }
   });
+
+  // 🎵 로그인한 사용자만 자동 재생
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("로그인 상태 감지됨:", user.email);
+      // 자동 재생 (브라우저 정책상 음소거 상태로 시작)
+      audio.muted = true;
+      playRandomSong();
+      setTimeout(() => {
+        audio.muted = false;
+      }, 1000);
+    } else {
+      console.log("로그아웃 상태 — 음악 재생 안 함");
+      audio.pause();
+      isPlaying = false;
+      playBtn.textContent = "▶ 음악 재생";
+      nowPlaying.textContent = "";
+    }
+  });
 </script>
+
 
 </body>
 </html>
