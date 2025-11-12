@@ -357,6 +357,23 @@
       </div>
     </div>
 
+    <!-- 공지사항 모달 -->
+<div id="noticeModal" class="auth-modal" style="display:flex;">
+  <div class="auth-modal-content">
+    <span class="auth-modal-close" id="closeNoticeBtn">&times;</span>
+    <h2>📢 공지사항</h2>
+    <div class="auth-form">
+      <p>
+        안녕하세요! <br>
+        MIXX HANIL MARKET을 이용해주셔서 감사합니다 😊 <br><br>
+        사이트를 이용하시기 전에 음악과 함께 즐겨보세요!
+      </p>
+      <button id="noticeCloseButton" class="auth-btn">닫기</button>
+    </div>
+  </div>
+</div>
+
+
     <script src="script.js"></script>
     <script src="admin_ui_control.js"></script>
     
@@ -430,6 +447,21 @@
       playRandomSong();
     }
   });
+
+  // 공지사항 모달 닫기 시 음악 자동 재생
+  const noticeModal = document.getElementById("noticeModal");
+  const noticeCloseBtn = document.getElementById("closeNoticeBtn");
+  const noticeCloseButton = document.getElementById("noticeCloseButton");
+  const playBtnSim = document.getElementById("playBtn");
+
+  function closeNoticeAndPlay() {
+    noticeModal.style.display = "none";
+    // 음악 재생 버튼 클릭과 동일한 이벤트 발생
+    playBtnSim.click();
+  }
+
+  noticeCloseBtn.addEventListener("click", closeNoticeAndPlay);
+  noticeCloseButton.addEventListener("click", closeNoticeAndPlay);
     
 </script>
 
