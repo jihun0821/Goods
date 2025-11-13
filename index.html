@@ -99,7 +99,7 @@
         <!-- 카드 섹션 -->
         <div class="cards-section">
             <div class="cards-container" id="cardsContainer">
-                <!-- 제품 카드들이 동적으로 추가됩니다 -->
+                <!-- 파이어베이스에서 제품카드 불러옴 -->
             </div>
         </div>
     </div>
@@ -177,12 +177,10 @@
           <input id="productName" type="text" placeholder="제품 이름" />
           <input id="productPrice" type="number" placeholder="가격 (원)" min="0" />
           <textarea id="productDescription" placeholder="제품 설명" rows="4"></textarea>
-
-          <!-- 사이즈 옵션 추가 -->
           <div class="checkbox-group">
             <label><input id="productHasSize" type="checkbox" /> 사이즈 옵션 설정</label>
           </div>
-          <input id="productSizes" type="text" placeholder="예: S,M,L 또는 250,255 (콤마로 구분)" class="product-size-input" style="display:none;" />
+          <input id="productSizes" type="text" placeholder="예: S,M,L(쉼표로 구분)" class="product-size-input" style="display:none;" />
 
           <button onclick="handleProductSubmit()" class="auth-btn">제품 등록하기</button>
         </div>
@@ -212,7 +210,6 @@
               <span id="detailSellerName"></span>
             </div>
             <div class="purchase-section">
-              <!-- 사이즈 셀렉트는 script에서 동적으로 추가됩니다 (id="purchaseSizeWrapper") -->
               <div class="quantity-selector">
                 <button onclick="decreaseQuantity()" class="quantity-btn">-</button>
                 <input id="purchaseQuantity" type="number" value="1" min="1" max="99" readonly />
@@ -291,29 +288,29 @@
     </div>
 
     <!-- 공지사항 모달 -->
-<div id="noticeModal" class="auth-modal" style="display:flex;">
-  <div class="auth-modal-content">
-    <span class="auth-modal-close" id="closeNoticeBtn">&times;</span>
-    <h2>📢 공지사항</h2>
-    <div class="auth-form">
-      <p>
-        안녕하세요! <br>
-        MIXX HANIL MARKET을 이용해주셔서 감사합니다.<br>
-        먼저 사이트를 이용하기 전 몇가지 안내사항이 있습니다.<br><br>
-        1. 사이트를 이용하기 위헤선 로그인이 필요합니다. 로그인은 한일픽 계정이 있다면 그대로 사용 가능하며 없을 경우 한일고 메일을 사용해 새로 만드시면 됩니다.<br>
-        2. 굿즈를 사기 전 반드시 개인정보 입력을 완료해주세요. 그래야 누가 굿즈를 얼마나 샀는지 정확히 확인할 수 있습니다.<br>
-        3, 이 창을 닫을시 노래가 흘러나오므로 주목받고 싶지 않다면 이어폰을 끼거나 음소거를 해두시는것을 추천합니다.
-      </p>
-      <button id="noticeCloseButton" class="auth-btn">닫기</button>
+    <div id="noticeModal" class="auth-modal" style="display:flex;">
+      <div class="auth-modal-content">
+        <span class="auth-modal-close" id="closeNoticeBtn">&times;</span>
+        <h2>📢 공지사항</h2>
+        <div class="auth-form">
+          <p>
+            안녕하세요 <br>
+            MIXX HANIL MARKET을 이용해주셔서 감사합니다.<br>
+            먼저 사이트를 이용하기 전 몇가지 안내사항이 있습니다.<br><br>
+            1. 사이트를 이용하기 위헤선 로그인이 필요합니다. 로그인은 한일픽 계정이 있다면 그대로 사용 가능하며 없을 경우 한일고 메일을 사용해 새로 만드시면 됩니다.<br>
+            2. 굿즈를 사기 전 반드시 개인정보 입력을 완료해주세요. 그래야 누가 굿즈를 얼마나 샀는지 정확히 확인할 수 있습니다.<br>
+            3, 이 창을 닫을시 노래가 흘러나오므로 주목받고 싶지 않다면 이어폰을 끼거나 음소거를 해두시는것을 추천합니다.
+          </p>
+          <button id="noticeCloseButton" class="auth-btn">닫기</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
 
-    <script src="script.js"></script>
-    <script src="admin_ui_control.js"></script>
+<script src="script.js"></script>
+<script src="admin_ui_control.js"></script>
     
-    <!-- 🎵 음악 플레이어 스크립트 -->
+<!-- 이거 따로 뺴야함 -->
 <script type="module">
   import {
     getAuth, onAuthStateChanged
@@ -384,7 +381,7 @@
     }
   });
 
-  // 공지사항 모달 닫기 시 음악 자동 재생
+  // 공지사항 모달 닫기 시 음악 자동 재생 기능 추가
   const noticeModal = document.getElementById("noticeModal");
   const noticeCloseBtn = document.getElementById("closeNoticeBtn");
   const noticeCloseButton = document.getElementById("noticeCloseButton");
@@ -392,7 +389,6 @@
 
   function closeNoticeAndPlay() {
     noticeModal.style.display = "none";
-    // 음악 재생 버튼 클릭과 동일한 이벤트 발생
     playBtnSim.click();
   }
 
@@ -400,7 +396,6 @@
   noticeCloseButton.addEventListener("click", closeNoticeAndPlay);
     
 </script>
-
 
 </body>
 </html>
