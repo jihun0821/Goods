@@ -187,7 +187,23 @@
       </div>
     </div>
 
-    <!-- 제품 상세 모달 -->
+    <!-- 판매 중단 모달 (새로 추가) -->
+    <div id="salesClosedModal" class="auth-modal">
+      <div class="auth-modal-content">
+        <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
+        <h2>⚠️ 판매 중단</h2>
+        <div class="auth-form">
+          <p style="text-align: center; font-size: 18px; line-height: 1.6;">
+            지금은 판매 기간이 아닙니다.<br><br>
+            판매 재개 시 다시 방문해주세요.
+          </p>
+          <button onclick="closeAllModals()" class="auth-btn">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 제품 상세 모달 (주석 처리) -->
+    <!--
     <div id="detailModal" class="auth-modal">
       <div class="auth-modal-content detail-modal-content">
         <span class="auth-modal-close" onclick="closeAllModals()">&times;</span>
@@ -221,6 +237,7 @@
         </div>
       </div>
     </div>
+    -->
 
     <!-- 개인정보 입력 모달 -->
     <div id="privacyModal" class="auth-modal">
