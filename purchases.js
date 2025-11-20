@@ -174,6 +174,7 @@ function createPurchaseCard(docId, purchase) {
     }
 
     card.innerHTML = `
+        <button class="cancel-btn" title="구매 취소 (삭제)">×</button>
         <div class="title-box">
             <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(purchase.productName)}" onerror="this.src='https://via.placeholder.com/300?text=Image+Error'">
         </div>
