@@ -67,12 +67,6 @@ function closeAllModals() {
     document.getElementById('productModal').style.display = 'none';
     document.getElementById('detailModal').style.display = 'none';
     document.getElementById('privacyModal').style.display = 'none';
-    
-    // 판매 중단 모달 닫기 추가
-    const salesClosedModal = document.getElementById('salesClosedModal');
-    if (salesClosedModal) {
-        salesClosedModal.style.display = 'none';
-    }
 }
 
 // 로그인 모달 열기
@@ -156,124 +150,107 @@ async function openPrivacyModal() {
     }
 }
 
-// 판매 중단 모달 열기 (새로 추가)
-function openSalesClosedModal() {
+// 제품 상세 모달 열기
+function openDetailModal(product) {
+    currentProductDetail = product;
+    
+    document.getElementById('detailProductName').textContent = product.name;
+    document.getElementById('detailProductImage').src = product.imageUrl || 'https://via.placeholder.com/400?text=No+Image';
+    document.getElementById('detailProductPrice').textContent = product.price.toLocaleString() + '원';
+    document.getElementById('detailProductDescription').textContent = product.description;
+    document.getElementById('detailSellerName').textContent = product.sellerName || '익명';
+    document.getElementById('purchaseQuantity').value = '1';
+    
+    // 사이즈 선택 UI 처리: 기존에 생성한 wrapper가 있으면 제거하고, 사이즈가 있으면 새로 추가
+    const purchaseSection = document.querySelector('#detailModal .purchase-section');
+    const existingWrapper = document.getElementById('purchaseSizeWrapper');
+    if (existingWrapper) existingWrapper.remove();
+
+    if (product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0) {
+        const wrapper = document.createElement('div');
+        wrapper.id = 'purchaseSizeWrapper';
+        wrapper.className = 'select-group';
+        const optionsHtml = product.sizes.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+        wrapper.innerHTML = `<label>사이즈</label><select id="purchaseSize" class="privacy-select">${optionsHtml}</select>`;
+        // insert before quantity selector so size appears above quantity
+        const qtySelector = purchaseSection.querySelector('.quantity-selector');
+        purchaseSection.insertBefore(wrapper, qtySelector);
+    }
+
     closeAllModals();
-    const salesClosedModal = document.getElementById('salesClosedModal');
-    if (salesClosedModal) {
-        salesClosedModal.style.display = 'flex';
+    document.getElementById('detailModal').style.display = 'flex';
+}
+
+// 수량 증가
+function increaseQuantity() {
+    const input = document.getElementById('purchaseQuantity');
+    const currentValue = parseInt(input.value);
+    if (currentValue < 99) {
+        input.value = currentValue + 1;
     }
 }
 
-/* ============================================
-   제품 상세 모달 관련 함수들 (주석 처리)
-   ============================================ */
-
-// 제품 상세 모달 열기
-// function openDetailModal(product) {
-//     currentProductDetail = product;
-    
-//     document.getElementById('detailProductName').textContent = product.name;
-//     document.getElementById('detailProductImage').src = product.imageUrl || 'https://via.placeholder.com/400?text=No+Image';
-//     document.getElementById('detailProductPrice').textContent = product.price.toLocaleString() + '원';
-//     document.getElementById('detailProductDescription').textContent = product.description;
-//     document.getElementById('detailSellerName').textContent = product.sellerName || '익명';
-//     document.getElementById('purchaseQuantity').value = '1';
-    
-//     // 사이즈 선택 UI 처리: 기존에 생성한 wrapper가 있으면 제거하고, 사이즈가 있으면 새로 추가
-//     const purchaseSection = document.querySelector('#detailModal .purchase-section');
-//     const existingWrapper = document.getElementById('purchaseSizeWrapper');
-//     if (existingWrapper) existingWrapper.remove();
-
-//     if (product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0) {
-//         const wrapper = document.createElement('div');
-//         wrapper.id = 'purchaseSizeWrapper';
-//         wrapper.className = 'select-group';
-//         const optionsHtml = product.sizes.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-//         wrapper.innerHTML = `<label>사이즈</label><select id="purchaseSize" class="privacy-select">${optionsHtml}</select>`;
-//         // insert before quantity selector so size appears above quantity
-//         const qtySelector = purchaseSection.querySelector('.quantity-selector');
-//         purchaseSection.insertBefore(wrapper, qtySelector);
-//     }
-
-//     closeAllModals();
-//     document.getElementById('detailModal').style.display = 'flex';
-// }
-
-// 수량 증가
-// function increaseQuantity() {
-//     const input = document.getElementById('purchaseQuantity');
-//     const currentValue = parseInt(input.value);
-//     if (currentValue < 99) {
-//         input.value = currentValue + 1;
-//     }
-// }
-
 // 수량 감소
-// function decreaseQuantity() {
-//     const input = document.getElementById('purchaseQuantity');
-//     const currentValue = parseInt(input.value);
-//     if (currentValue > 1) {
-//         input.value = currentValue - 1;
-//     }
-// }
+function decreaseQuantity() {
+    const input = document.getElementById('purchaseQuantity');
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+        input.value = currentValue - 1;
+    }
+}
 
 // 구매 처리
-// async function handlePurchase() {
-//     if (!currentUser) {
-//         alert('구매하려면 로그인이 필요합니다.');
-//         closeAllModals();
-//         openLoginModal();
-//         return;
-//     }
+async function handlePurchase() {
+    if (!currentUser) {
+        alert('구매하려면 로그인이 필요합니다.');
+        closeAllModals();
+        openLoginModal();
+        return;
+    }
     
-//     if (!currentProductDetail) {
-//         alert('제품 정보를 찾을 수 없습니다.');
-//         return;
-//     }
+    if (!currentProductDetail) {
+        alert('제품 정보를 찾을 수 없습니다.');
+        return;
+    }
     
-//     const quantity = parseInt(document.getElementById('purchaseQuantity').value);
+    const quantity = parseInt(document.getElementById('purchaseQuantity').value);
     
-//     if (quantity < 1) {
-//         alert('구매 수량을 확인해주세요.');
-//         return;
-//     }
+    if (quantity < 1) {
+        alert('구매 수량을 확인해주세요.');
+        return;
+    }
 
-//     // 선택된 사이즈가 있으면 가져오기
-//     const sizeSelect = document.getElementById('purchaseSize');
-//     const selectedSize = sizeSelect ? sizeSelect.value : null;
+    // 선택된 사이즈가 있으면 가져오기
+    const sizeSelect = document.getElementById('purchaseSize');
+    const selectedSize = sizeSelect ? sizeSelect.value : null;
     
-//     try {
-//         // purchases 컬렉션에 구매 정보 저장 (사이즈 포함)
-//         await window.firebase.addDoc(window.firebase.collection(db, 'purchases'), {
-//             productName: currentProductDetail.name,
-//             productPrice: currentProductDetail.price,
-//             quantity: quantity,
-//             totalPrice: currentProductDetail.price * quantity,
-//             buyerName: currentUser.displayName || currentUser.email,
-//             buyerId: currentUser.uid,
-//             sellerName: currentProductDetail.sellerName,
-//             sellerId: currentProductDetail.sellerId,
-//             productImageUrl: currentProductDetail.imageUrl,
-//             selectedSize: selectedSize || '',
-//             purchaseDate: new Date(),
-//             createdAt: new Date()
-//         });
+    try {
+        // purchases 컬렉션에 구매 정보 저장 (사이즈 포함)
+        await window.firebase.addDoc(window.firebase.collection(db, 'purchases'), {
+            productName: currentProductDetail.name,
+            productPrice: currentProductDetail.price,
+            quantity: quantity,
+            totalPrice: currentProductDetail.price * quantity,
+            buyerName: currentUser.displayName || currentUser.email,
+            buyerId: currentUser.uid,
+            sellerName: currentProductDetail.sellerName,
+            sellerId: currentProductDetail.sellerId,
+            productImageUrl: currentProductDetail.imageUrl,
+            selectedSize: selectedSize || '',
+            purchaseDate: new Date(),
+            createdAt: new Date()
+        });
         
-//         let msg = `구매가 완료되었습니다!\n제품: ${currentProductDetail.name}\n수량: ${quantity}개\n총 금액: ${(currentProductDetail.price * quantity).toLocaleString()}원`;
-//         if (selectedSize) msg += `\n선택 사이즈: ${selectedSize}`;
-//         alert(msg);
-//         closeAllModals();
+        let msg = `구매가 완료되었습니다!\n제품: ${currentProductDetail.name}\n수량: ${quantity}개\n총 금액: ${(currentProductDetail.price * quantity).toLocaleString()}원`;
+        if (selectedSize) msg += `\n선택 사이즈: ${selectedSize}`;
+        alert(msg);
+        closeAllModals();
         
-//     } catch (error) {
-//         console.error('구매 처리 실패:', error);
-//         alert('구매 처리에 실패했습니다: ' + error.message);
-//     }
-// }
-
-/* ============================================
-   주석 처리 끝
-   ============================================ */
+    } catch (error) {
+        console.error('구매 처리 실패:', error);
+        alert('구매 처리에 실패했습니다: ' + error.message);
+    }
+}
 
 // 로그인 처리
 async function handleLogin() {
@@ -674,7 +651,7 @@ async function loadProducts() {
     }
 }
 
-// 제품 카드 생성 (수정: 클릭 시 판매 중단 모달 표시)
+// 제품 카드 생성
 function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -692,10 +669,10 @@ function createProductCard(product) {
         <div class="description-box">${escapeHtml(product.description)}</div>
     `;
     
-    // 카드 클릭 이벤트 추가 - 판매 중단 모달 열기
+    // 카드 클릭 이벤트 추가
     card.style.cursor = 'pointer';
     card.addEventListener('click', () => {
-        openSalesClosedModal();
+        openDetailModal(product);
     });
     
     return card;
